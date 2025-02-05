@@ -15,7 +15,7 @@ class PermisosController extends Controller
     {
         // Obtener los parámetros de paginación de la solicitud
         $page = $request->get('page', 1);
-        $perPage = $request->get('per_page', 5);
+        $perPage = $request->get('per_page');
         $search = $request->get('search');
 
         $query = Permission::with('roles')->orderBy('id', 'asc');
@@ -30,14 +30,33 @@ class PermisosController extends Controller
             });
         }
 
-        $permissions = $query->paginate($perPage, '*', 'page', $page);
+        // Si se proporciona perPage, aplicar paginación, de lo contrario traer todo
+        if ($perPage) {
+            $permissions = $query->paginate($perPage, '*', 'page', $page);
+            return response()->json([
+                'data' => $permissions->items(),
+                'draw' => intval($request->get('draw')),
+                'recordsTotal' => $permissions->total(),
+                'recordsFiltered' => $permissions->total(),
+            ]);
+        } else {
+            $permissions = $query->get();
+            return response()->json([
+                'data' => $permissions,
+                'draw' => intval($request->get('draw')),
+                'recordsTotal' => $permissions->count(),
+                'recordsFiltered' => $permissions->count(),
+            ]);
+        }
+
+        /* $permissions = $query->paginate($perPage, '*', 'page', $page);
 
         return response()->json([
             'data' => $permissions->items(),
             'draw' => intval($request->get('draw')),
             'recordsTotal' => $permissions->total(),
             'recordsFiltered' => $permissions->total(), // Si tienes filtrado
-        ]);
+        ]); */
     }
 
     /**
@@ -54,6 +73,13 @@ class PermisosController extends Controller
     public function store(Request $request)
     {
         //
+        try {
+            $permission = Permission::create($request->all());
+            return response()->json(['data' => $permission]);
+        } catch (\Error $e) {
+            //throw $th;
+            return response()->json(['error', $e]);
+        }
     }
 
     /**
@@ -78,6 +104,17 @@ class PermisosController extends Controller
     public function update(Request $request, $id)
     {
         //
+        try {
+            $permission = Permission::find($id);
+            $permission->name = $request->name;
+            $permission->description = $request->description;
+            $permission->save();
+
+            return response()->json(['data' => $permission]);
+        } catch (\Error $e) {
+            //throw $th;
+            return response()->json(['error', $e]);
+        }
     }
 
     /**
@@ -86,5 +123,14 @@ class PermisosController extends Controller
     public function destroy($id)
     {
         //
+        try {
+            $permission = Permission::findOrFail($id);
+            $permission->delete();
+
+            return response()->json(['data' => 'registro '.$permission->name.' eliminado']);
+        } catch (\Error $e) {
+            //throw $th;
+            return response()->json(['error', $e]);
+        }
     }
 }

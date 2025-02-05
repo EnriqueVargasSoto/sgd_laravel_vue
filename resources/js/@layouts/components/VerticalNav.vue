@@ -140,6 +140,7 @@ const hideTitleAndIcon = configStore.isVerticalNavMini(isHovered)
         :options="{ wheelPropagation: true }"
         @ps-scroll-y="handleNavScroll"
       >
+      <!-- <span>{{ navItems }}</span> -->
         <Component
           :is="resolveNavItemComponent(item)"
           v-for="(item, index) in navItems"

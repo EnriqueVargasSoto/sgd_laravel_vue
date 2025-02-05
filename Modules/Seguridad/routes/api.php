@@ -1,7 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\Seguridad\Http\Controllers\AuthController;
 use Modules\Seguridad\Http\Controllers\PermisosController;
+use Modules\Seguridad\Http\Controllers\RoleController;
 use Modules\Seguridad\Http\Controllers\SeguridadController;
 
 /*
@@ -21,4 +23,7 @@ Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
 });
 
 Route::apiResource('permisos', PermisosController::class);
+Route::apiResource('roles', RoleController::class);
+
+Route::post('login', [AuthController::class, 'login']);
 
