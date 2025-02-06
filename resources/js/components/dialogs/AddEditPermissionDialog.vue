@@ -46,22 +46,23 @@ watch(() => props, () => {
       <VCardText>
         <!-- 👉 Title -->
         <h4 class="text-h4 text-center mb-2">
-          {{ props.permissionName ? 'Edit' : 'Add' }} Permission
+          {{ props.permissionName ? 'Editar' : 'Agregar' }} Permiso
         </h4>
         <p class="text-body-1 text-center mb-6">
-          {{ props.permissionName ? 'Edit' : 'Add' }}  permission as per your requirements.
+          {{ props.permissionName ? 'Editar' : 'Agregar' }}  permiso según sus requisitos.
         </p>
 
         <!-- 👉 Form -->
-        <VForm>
+        <VForm  style="text-align: center;">
           <VAlert
             type="warning"
-            title="Warning!"
+            title="¡Advertencia!"
             variant="tonal"
             class="mb-6"
+
           >
             <template #text>
-              By {{ props.permissionName ? 'editing' : 'adding' }} the permission name, you might break the system permissions functionality.
+              Al {{ props.permissionName ? 'editar' : 'agregar' }} el nombre del permiso, es posible que se rompa la funcionalidad de permisos del sistema.
             </template>
           </VAlert>
 
@@ -72,10 +73,20 @@ watch(() => props, () => {
               placeholder="Enter Permission Name"
             />
 
-            <VBtn @click="onSubmit">
-              {{ props.permissionName ? 'Update' : 'Add' }}
-            </VBtn>
+
           </div>
+          <!-- 👉 Role name -->
+          <div class="d-flex gap-4 mb-6 flex-wrap flex-column flex-sm-row">
+            <AppTextField
+              v-model="currentPermissionName"
+              placeholder="Enter Permission Name"
+            />
+
+
+          </div>
+          <VBtn @click="onSubmit" width="70%" >
+              {{ props.permissionName ? 'Actualizar' : 'Agregar' }}
+            </VBtn>
 
           <VCheckbox label="Set as core permission" />
         </VForm>

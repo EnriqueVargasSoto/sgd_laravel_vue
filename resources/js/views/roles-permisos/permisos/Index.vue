@@ -1,151 +1,72 @@
-<script>
-    import api from '../../../services/api/consulta.js';
-    import moment from "moment";
+<script setup>
+import * as demoCode from '@/views/demos/forms/tables/data-table/demoCodeDataTable'
+import dayjs from "dayjs";
 
-    /* const headers = [
-        {
-            title: 'Name',
-            key: 'name',
-        },
-        {
-            title: 'Assigned To',
-            key: 'assignedTo',
-            sortable: false,
-        },
-        {
-            title: 'Created Date',
-            key: 'createdDate',
-            sortable: false,
-        },
-        {
-            title: 'Actions',
-            key: 'actions',
-            sortable: false,
-        },
-    ]
+//const headers = ref([])
 
-    const search = ref('')
+const search = ref('')
 
-    // Data table options
-    const itemsPerPage = ref(10)
-    const page = ref(1)
-    const sortBy = ref()
-    const orderBy = ref() */
+// Data table options
+const itemsPerPage = ref(10)
+const page = ref(1)
+const sortBy = ref()
+const orderBy = ref()
 
-    /* const updateOptions = options => {
-        sortBy.value = options.sortBy[0]?.key
-        orderBy.value = options.sortBy[0]?.order
-    } */
+const updateOptions = options => {
+  sortBy.value = options.sortBy[0]?.key
+  orderBy.value = options.sortBy[0]?.order
+}
 
-    /* const isPermissionDialogVisible = ref(false)
-    const isAddPermissionDialogVisible = ref(false)
-    const permissionName = ref('') */
+const isPermissionDialogVisible = ref(false)
+const isAddPermissionDialogVisible = ref(false)
+const permissionName = ref('')
 
-    /* const colors = {
-        'support': {
-            color: 'info',
-            text: 'Support',
-        },
-        'users': {
-            color: 'success',
-            text: 'Users',
-        },
-        'manager': {
-            color: 'warning',
-            text: 'Manager',
-        },
-        'administrator': {
-            color: 'primary',
-            text: 'Administrator',
-        },
-        'restricted-user': {
-            color: 'error',
-            text: 'Restricted User',
-        },
-    } */
+const colors = {
+  'Editor': {
+    color: 'info',
+    text: 'Editor'//'Support',
+  },
+  'users': {
+    color: 'success',
+    text: 'Users',
+  },
+  'manager': {
+    color: 'warning',
+    text: 'Manager',
+  },
+  'Admin': {
+    color: 'primary',
+    text: 'Admin',
+  },
+  'restricted-user': {
+    color: 'error',
+    text: 'Restricted User',
+  },
+}
 
-    /* const { data: permissionsData } = await useApi(createUrl('/apps/permissions', {
-        query: {
-            q: search,
-            itemsPerPage,
-            page,
-            sortBy,
-            orderBy,
-        },
-    }))
+const { data: permissionsData } = await useApi(createUrl('/permisos', {
+  query: {
+    search,
+    per_page: itemsPerPage,
+    page,
+    //sortBy,
+    //orderBy,
+  },
+}))
 
-    const permissions = computed(() => permissionsData.value.permissions)
-    const totalPermissions = computed(() => permissionsData.value.totalPermissions)
+// Función para formatear la fecha
+const formatDate = (timestamp) => {
+  return dayjs(timestamp).format("DD/MM/YYYY");
+};
 
-    const editPermission = name => {
-        isPermissionDialogVisible.value = true
-        permissionName.value = name
-    } */
+const permissions = computed(() => permissionsData.value.data)
+const headers = computed(() => permissionsData.value.headers)
+const totalPermissions = computed(() => permissionsData.value.recordsTotal)
 
-
-
-    export default {
-        data(){
-            return {
-                //datos para permisos
-                permisos: [],
-                permiso: {},
-
-                //Tabla
-                search: '',
-                itemsPerPage: 10,
-                page: 1,
-                sortBy: '',
-                orderBy: '',
-                headers: [
-                    { title: 'Nombres', key: 'name' },
-                    { title: 'Roles', key: 'assignedTo', sortable: false },
-                    { title: 'Descripcion', key: 'description', sortable: false },
-                    { title: 'fecha', key: 'created_at', sortable: false },
-                    { title: 'Acciones', key: 'actions', sortable: false },
-                ],
-
-                // Diálogos de permisos
-                isPermissionDialogVisible: false,
-                isAddPermissionDialogVisible: false,
-                permissionName: '',
-
-                // Colores de roles
-                colors: {
-                    'support': { color: 'info', text: 'Support' },
-                    'users': { color: 'success', text: 'Users' },
-                    'manager': { color: 'warning', text: 'Manager' },
-                    'administrator': { color: 'primary', text: 'Administrator' },
-                    'restricted-user': { color: 'error', text: 'Restricted User' },
-                },
-            }
-        },
-        computed: {
-            formattedItems() {
-                return this.items.map(item => ({
-                    ...item,
-                    created_at: this.formatDate(item.created_at),
-                }));
-            },
-        },
-        async mounted(){
-            await this.obtenerPermisos();
-        },
-        methods: {
-            async obtenerPermisos() {
-                const response = await api.get('/permisos');
-                this.permisos = response.data;
-                console.log('permisos: ', this.permisos.data);
-            },
-            formatDate(date) {
-                const d = new Date(date);
-                const day = String(d.getDate()).padStart(2, '0');
-                const month = String(d.getMonth() + 1).padStart(2, '0');
-                const year = String(d.getFullYear()); // last two digits of the year
-                return `${day}/${month}/${year}`;
-            },
-        }
-    }
+const editPermission = name => {
+  isPermissionDialogVisible.value = true
+  permissionName.value = name
+}
 </script>
 
 <template>
@@ -164,9 +85,9 @@
                 { value: 25, title: '25' },
                 { value: 50, title: '50' },
                 { value: 100, title: '100' },
-                { value: 9, title: 'All' },
+                { value: totalPermissions, title: 'Todos' },
               ]"
-              style="inline-size: 5.5rem;"
+              style="inline-size: 7.0rem;"
               @update:model-value="itemsPerPage = parseInt($event, 10)"
             />
           </div>
@@ -174,7 +95,7 @@
           <div class="d-flex align-center gap-4 flex-wrap">
             <AppTextField
               v-model="search"
-              placeholder="Buscar Permiso"
+              placeholder="Buscar..."
               style="inline-size: 15.625rem;"
             />
             <VBtn
@@ -196,10 +117,10 @@
           :items-per-page-options="[
             { value: 5, title: '5' },
             { value: 10, title: '10' },
-            { value: 9, title: '$vuetify.dataFooter.itemsPerPageAll' },
+            { value: -1, title: '$vuetify.dataFooter.itemsPerPageAll' },
           ]"
           :headers="headers"
-          :items="permisos.data"
+          :items="permissions"
           item-value="name"
           class="text-no-wrap"
           @update:options="updateOptions"
@@ -215,21 +136,25 @@
           <template #item.assignedTo="{ item }">
             <div class="d-flex gap-4">
               <VChip
-                v-for="text in item.assignedTo"
+                v-for="text in item.roles"
                 :key="text"
                 label
                 size="small"
-                :color="colors[text].color"
+                :color="colors[text.name].color"
                 class="font-weight-medium"
               >
-                {{ colors[text].text }}
+                {{ colors[text.name].text }}
+                  <!-- {{ text.name }} -->
               </VChip>
             </div>
           </template>
 
+          <!-- Name -->
           <template #item.created_at="{ item }">
-            <div>{{ formatDate(item.created_at) }}</div>
-        </template>
+            <!-- <div class="text-high-emphasis text-body-1"> -->
+              {{ formatDate(item.created_at) }}
+            <!-- </div> -->
+          </template>
 
           <template #bottom>
             <TablePagination
@@ -261,13 +186,29 @@
             </IconBtn>
           </template>
         </VDataTableServer>
+
       </VCard>
 
-      <AddEditPermissionDialog
+      <AddEditPermissionComponentDialog
         v-model:is-dialog-visible="isPermissionDialogVisible"
         v-model:permission-name="permissionName"
       />
-      <AddEditPermissionDialog v-model:is-dialog-visible="isAddPermissionDialogVisible" />
+      <AddEditPermissionComponentDialog v-model:is-dialog-visible="isAddPermissionDialogVisible" />
+    </VCol>
+
+    <!-- 👉 Kitchen Sink  -->
+    <VCol cols="12">
+        <!-- <VCard>
+            <VCardItem>
+                <VCardTitle>Kitchen Sink</VCardTitle>
+
+            </VCardItem>
+
+        <DemoDataTableKitchenSink />
+
+        </VCard> -->
+        <CustomerDataTabe titulo="Permisos" :permisos="permissions || []" :headers="headers"/>
+
     </VCol>
   </VRow>
 </template>

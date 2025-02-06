@@ -57,7 +57,7 @@ export default defineConfig({
       layoutsDirs: './resources/js/layouts/',
     }), // Docs: https://github.com/antfu/unplugin-vue-components#unplugin-vue-components
     Components({
-      dirs: ['resources/js/@core/components', 'resources/js/views/demos', 'resources/js/components'],
+      dirs: ['resources/js/@core/components', 'resources/js/views/demos', 'resources/js/components', 'resources/js/views/roles-permisos/permisos/components', 'resources/js/views/components'],
       dts: true,
       resolvers: [
         componentName => {
