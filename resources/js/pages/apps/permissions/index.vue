@@ -61,18 +61,20 @@ const colors = {
   },
 }
 
-const { data: permissionsData } = await useApi(createUrl('/apps/permissions', {
+const { data: permissionsData } = await useApi(createUrl('/permisos', {
   query: {
-    q: search,
-    itemsPerPage,
-    page,
-    sortBy,
-    orderBy,
+    search: search,
+    per_page: itemsPerPage,
+    page: page,
+    /* sortBy,
+    orderBy, */
   },
 }))
 
-const permissions = computed(() => permissionsData.value.permissions)
-const totalPermissions = computed(() => permissionsData.value.totalPermissions)
+const permissions = computed(() => {permissionsData.value.data
+    console.log('permisos: ',permissionsData.value )
+})
+const totalPermissions = computed(() => permissionsData.value.recordsTotal)
 
 const editPermission = name => {
   isPermissionDialogVisible.value = true

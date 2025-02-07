@@ -1,437 +1,353 @@
 <script setup>
+import dayjs from "dayjs";
+import { ref } from "vue";
 
 const props = defineProps({
-    titulo: String,
-    permisos: {
-        type: Array,
-        required: false, // Opcional, según necesidad
-        default: () => [], // Se recomienda usar una función para valores por defecto en arrays
-    },
-    headers: {
-        type: Array,
-        required: false, // Opcional, según necesidad
-        default: () => [], // Se recomienda usar una función para valores por defecto en arrays
-    }
-  /* isDialogVisible: {
-    type: Boolean,
+  endpoint: String, // Ruta API
+  dynamicComponent: {
+    type: Object,
     required: true,
   },
-  permissionName: {
-    type: String,
-    required: false,
-    default: '',
-  }, */
-})
+});
 
-const date = ref('')
 
-/* const {
-  data: productList,
-  error,
-} = await useApi('pages/datatable')
- */
+
+//Variables reactivas
 const search = ref('')
+const itemsPerPage = ref(10)
+const totalItems = computed(() => data.value.recordsTotal)
+const page = ref(1)
+const sortBy = ref()
+const orderBy = ref()
+const check = ref(false);
 
-// headers
-/* const headers = [
-  {
-    title: 'PRODUCT',
-    key: 'name',
+//data obtenida del api
+const { data } = await useApi(createUrl(`/${props.endpoint}`, {
+  query: {
+    search,
+    per_page: itemsPerPage,
+    page,
+    //sortBy,
+    //orderBy,
   },
-  {
-    title: 'DATE',
-    key: 'date',
-  },
-  {
-    title: 'CATEGORY',
-    key: 'product.category',
-  },
-  {
-    title: 'BUYERS',
-    key: 'buyer.name',
-  },
-  {
-    title: 'PAYMENT',
-    key: 'payment',
-    sortable: false,
-  },
-  {
-    title: 'STATUS',
-    key: 'status',
-    sortable: false,
-  },
-  {
-    title: 'DELETE',
-    key: 'delete',
-    sortable: false,
-  },
-] */
+}))
 
-const deleteItem = itemId => {
-  if (!productList.value)
-    return
-  const index = productList.value.findIndex(item => item.product.id === itemId)
+// Variables para la tabla
+const headers = ref([]);
+const buttons = ref([]);
+const filters = ref([]);
+const title = ref("Tabla");
+const tableData = computed(() => data.value.data)
 
-  productList.value.splice(index, 1)
+
+const updateOptions = options => {
+  sortBy.value = options.sortBy[0]?.key
+  orderBy.value = options.sortBy[0]?.order
 }
 
-const categoryIcons = [
-  {
-    name: 'Mouse',
-    icon: 'tabler-mouse',
-    color: 'warning',
-  },
-  {
-    name: 'Glass',
-    icon: 'tabler-eyeglass',
-    color: 'primary',
-  },
-  {
-    name: 'Smart Watch',
-    icon: 'tabler-device-watch',
-    color: 'success',
-  },
-  {
-    name: 'Bag',
-    icon: 'tabler-briefcase',
-    color: 'info',
-  },
-  {
-    name: 'Storage Device',
-    icon: 'tabler-device-audio-tape',
-    color: 'warning',
-  },
-  {
-    name: 'Bluetooth',
-    icon: 'tabler-bluetooth',
-    color: 'error',
-  },
-  {
-    name: 'Gaming',
-    icon: 'tabler-device-gamepad-2',
-    color: 'warning',
-  },
-  {
-    name: 'Home',
-    icon: 'tabler-home',
-    color: 'error',
-  },
-  {
-    name: 'VR',
-    icon: 'tabler-badge-vr',
-    color: 'primary',
-  },
-  {
-    name: 'Shoes',
-    icon: 'tabler-shoe',
-    color: 'success',
-  },
-  {
-    name: 'Electronics',
-    icon: 'tabler-cpu',
-    color: 'info',
-  },
-  {
-    name: 'Projector',
-    icon: 'tabler-theater',
-    color: 'warning',
-  },
-  {
-    name: 'iPod',
-    icon: 'tabler-device-airpods',
-    color: 'error',
-  },
-  {
-    name: 'Keyboard',
-    icon: 'tabler-keyboard',
-    color: 'primary',
-  },
-  {
-    name: 'Smart Phone',
-    icon: 'tabler-device-mobile',
-    color: 'success',
-  },
-  {
-    name: 'Smart TV',
-    icon: 'tabler-device-tv',
-    color: 'info',
-  },
-  {
-    name: 'Google Home',
-    icon: 'tabler-brand-google',
-    color: 'warning',
-  },
-  {
-    name: 'Mac',
-    icon: 'tabler-brand-apple',
-    color: 'error',
-  },
-  {
-    name: 'Headphone',
-    icon: 'tabler-headphones',
-    color: 'primary',
-  },
-  {
-    name: 'iMac',
-    icon: 'tabler-device-imac',
-    color: 'success',
-  },
-  {
-    name: 'iPhone',
-    icon: 'tabler-brand-apple',
-    color: 'warning',
-  },
-]
+const isPermissionDialogVisible = ref(false)
+const isAddPermissionDialogVisible = ref(false)
+const permissionName = ref('')
 
-const resolveStatusColor = status => {
-  if (status === 'Confirmed')
-    return 'primary'
-  if (status === 'Completed')
-    return 'success'
-  if (status === 'Cancelled')
-    return 'error'
+const colors = {
+  'Editor': {
+    color: 'info',
+    text: 'Editor'//'Support',
+  },
+  'users': {
+    color: 'success',
+    text: 'Users',
+  },
+  'manager': {
+    color: 'warning',
+    text: 'Manager',
+  },
+  'Admin': {
+    color: 'primary',
+    text: 'Admin',
+  },
+  'restricted-user': {
+    color: 'error',
+    text: 'Restricted User',
+  },
 }
 
-const categoryIconFilter = categoryName => {
-  const index = categoryIcons.findIndex(category => category.name === categoryName)
-  if (index !== -1)
-    return [{
-      icon: categoryIcons[index].icon,
-      color: categoryIcons[index].color,
-    }]
+// Función para inicializar la tabla (obtener configuración inicial)
+const fetchInitTabla = async () => {
+  try {
+    const { data } = await useApi(`/${props.endpoint}-inicializa-tabla`);
 
-  return [{
-    icon: 'tabler-help-circle',
-    color: 'primary',
-  }]
+    headers.value = data?.value.data?.headers || [];
+    buttons.value = data?.value.data?.buttons || [];
+    filters.value = data?.value.data?.filters || [];
+    title.value = data?.value.data?.title || "Tabla";
+    itemsPerPage.value = data?.value.data?.par_page || 10;
+    page.value = data?.value.data?.page || 1;
+    check.value = data?.value.data?.check || false;
+  } catch (error) {
+    console.error("Error al cargar la configuración de la tabla:", error);
+  }
+};
+
+// Función para obtener los datos paginados
+/* const fetchData = async () => {
+  try {
+    //loading.value = true;
+    const { data } = await useApi(`/${props.endpoint}`, {
+      query: {
+        search: search.value,
+        per_page: itemsPerPage.value,
+        page: page.value,
+      },
+    });
+
+  } catch (error) {
+    console.error("Error al cargar los datos:", error);
+  } finally {
+    //loading.value = false;
+  }
+}; */
+
+// Función para formatear la fecha
+const formatDate = (timestamp) => {
+  return dayjs(timestamp).format("DD/MM/YYYY");
+};
+
+
+
+
+
+
+//const headers = computed(() => permissionsData.value.headers)
+
+
+const editPermission = name => {
+  isPermissionDialogVisible.value = true
+  permissionName.value = name
 }
 
-/* if (error.value)
-  console.error(error.value) */
+const handleAction = (action) => {
+    console.log(action);
+    if (action === 'create') {
+        console.log(action);
+        isAddPermissionDialogVisible.value = true
+    }
+    // Puedes agregar más acciones aquí
+};
 
-const options = ref({
-  page: 1,
-  itemsPerPage: 5,
-  sortBy: [''],
-  sortDesc: [false],
-})
+// Llamar `fetchInitTabla` una vez al montar el componente
+onMounted(async () => {
+  await fetchInitTabla();
 
-// 📌 Calculamos los valores de paginación dinámicamente
-/* const totalRecords = computed(() => productList.length);
-const startRecord = computed(() => (options.page - 1) * options.itemsPerPage + 1);
-const endRecord = computed(() => Math.min(options.page * options.itemsPerPage, totalRecords.value)); */
+});
+/* computed(async () => {
+    await fetchData();
+}); */
 </script>
 
 <template>
-    <VCard>
+  <VRow>
+    <VCol cols="12">
+      <VCard>
         <VCardItem>
             <div class="d-flex align-center justify-space-between flex-wrap gap-4">
                 <!-- Titulo -->
                 <div class="d-flex gap-2 align-center">
-                    <VCardTitle>{{titulo}}</VCardTitle>
+                    <VCardTitle>{{title}}</VCardTitle>
                 </div>
 
                 <!-- Botones -->
                 <div class="d-flex align-center gap-4 flex-wrap">
 
-                    <VBtn
+                    <!-- <VBtn
                         density="default"
                         prepend-icon="tabler-plus"
                         @click="isAddPermissionDialogVisible = true"
                     >
                         Agregar Permiso
-                    </VBtn>
+                    </VBtn> -->
 
                     <VBtn
-                        density="default"
-                        prepend-icon="tabler-plus"
-                        @click="isAddPermissionDialogVisible = true"
+                        v-for="btn in buttons"
+                        :key="btn.action"
+                        :density="btn.density"
+                        :prepend-icon="btn.icon"
+                        :color="btn.color"
+                        @click="handleAction(btn.action)"
                     >
-                        Agregar Permiso
+                        {{ btn.label }}
                     </VBtn>
                 </div>
             </div>
 
         </VCardItem>
+        <VCardText class="d-flex align-center justify-space-between flex-wrap gap-4">
+          <!-- <div class="d-flex gap-2 align-center">
+            <p class="text-body-1 mb-0">
+              Ver
+            </p>
+            <AppSelect
+              :model-value="itemsPerPage"
+              :items="[
+                { value: 5, title: '5' },
+                { value: 25, title: '25' },
+                { value: 50, title: '50' },
+                { value: 100, title: '100' },
+                { value: totalPermissions, title: 'Todos' },
+              ]"
+              style="inline-size: 7.0rem;"
+              @update:model-value="itemsPerPage = parseInt($event, 10)"
+            />
+          </div> -->
 
-        <div>
-            <!-- Filtros -->
-            <VCardText style="padding: 0px 24px;">
-                <VRow>
-                    <VCol
-                        cols="12"
-                        md="4"
-                    >
-                        <AppTextField
-                            v-model="search"
-                            placeholder="Search ..."
-                            append-inner-icon="tabler-search"
-                            single-line
-                            hide-details
-                            dense
-                            outlined
-                            label="Standard"
-                        />
-                    </VCol>
-                    <VCol
-                        cols="12"
-                        md="4"
-                    >
-                        <AppSelect
-                            :items="['Foo', 'Bar', 'Fizz', 'Buzz']"
-                            label="Standard"
-                            placeholder="Select Item"
-                        />
-                    </VCol>
-
-                </VRow>
-            </VCardText>
-
-            <!-- 👉 Data Table  -->
-            <VDataTable
-                :headers="headers"
-                :items="permisos"
-                :search="search"
-                :items-per-page="options.itemsPerPage"
-                class="text-no-wrap"
-                :page="options.page"
-                :options="options"
-                :next-page-label="Siguiente"
-                :prev-page-label="Anterior"
+          <div class="d-flex align-center gap-4 flex-wrap">
+            <AppTextField
+              v-model="search"
+              placeholder="Buscar..."
+              style="inline-size: 15.625rem;"
+            />
+           <!--  <VBtn
+              density="default"
+              prepend-icon="tabler-plus"
+              @click="isAddPermissionDialogVisible = true"
             >
-                <!-- product -->
-                <!-- <template #item.product.name="{ item }">
-                    <div class="d-flex align-center">
-                    <div>
-                        <VImg
-                        :src="item.product.image"
-                        height="40"
-                        width="40"
+              Agregar Permiso
+            </VBtn> -->
+          </div>
+        </VCardText>
+
+        <VDivider />
+
+        <VDataTableServer
+          v-model:items-per-page="itemsPerPage"
+          v-model:page="page"
+          :items-length="totalItems"
+          :items-per-page-options="[
+            { value: 5, title: '5' },
+            { value: 10, title: '10' },
+            { value: -1, title: '$vuetify.dataFooter.itemsPerPageAll' },
+          ]"
+          :headers="headers"
+          :items="tableData"
+          :show-select="check"
+          prev-page-label="'Previous'"
+          item-value="name"
+          class="text-no-wrap"
+          @update:options="updateOptions"
+        >
+          <!-- Name -->
+          <template #item.name="{ item }">
+            <div class="text-high-emphasis text-body-1">
+              {{ item.name }}
+            </div>
+          </template>
+
+          <!-- Assigned To -->
+          <template #item.assignedTo="{ item }">
+            <div class="d-flex gap-4">
+              <VChip
+                v-for="text in item.roles"
+                :key="text"
+                label
+                size="small"
+                :color="colors[text.name].color"
+                class="font-weight-medium"
+              >
+                {{ colors[text.name].text }}
+                  <!-- {{ text.name }} -->
+              </VChip>
+            </div>
+          </template>
+
+          <!-- Name -->
+          <template #item.created_at="{ item }">
+            <!-- <div class="text-high-emphasis text-body-1"> -->
+              {{ formatDate(item.created_at) }}
+            <!-- </div> -->
+          </template>
+
+          <template #bottom>
+            <div class="d-flex flex-column pa-4" style="padding-left: 24px!important;padding-right: 24px!important;">
+                <!-- Select para la cantidad de registros por página -->
+                <div class="d-flex gap-2 align-center">
+                        <p class="text-body-1 mb-0">
+                        Ver
+                        </p>
+                        <AppSelect
+                        :model-value="itemsPerPage"
+                        :items="[
+                            { value: 5, title: '5' },
+                            { value: 10, title: '10' },
+                            { value: 25, title: '25' },
+                            { value: 50, title: '50' },
+                            { value: 100, title: '100' },
+                            { value: totalItems, title: 'Todos' },
+                        ]"
+                        style="inline-size: 7.0rem;"
+                        @update:model-value="itemsPerPage = parseInt($event, 10)"
                         />
                     </div>
-                    <div class="d-flex flex-column ms-3">
-                        <span class="d-block font-weight-medium text-truncate text-high-emphasis">{{ item.product.name }}</span>
-                        <span class="text-xs">{{ item.product.brand }}</span>
-                    </div>
-                    </div>
-                </template> -->
 
-                <!-- category -->
-                <template #item.product.category="{ item }">
-                    <div class="d-flex align-center">
-                    <VAvatar
-                        v-for="(category, index) in categoryIconFilter(item.product.category)"
-                        :key="index"
-                        size="26"
-                        :color="category.color"
-                        variant="tonal"
-                    >
-                        <VIcon
-                        size="20"
-                        :color="category.color"
-                        class="rounded-0"
-                        >
-                        {{ category.icon }}
-                        </VIcon>
-                    </VAvatar>
-                    <span class="ms-1 text-no-wrap">{{ item.product.category }}</span>
-                    </div>
-                </template>
+                <!-- Texto de información y la paginación -->
+                <div class="d-flex justify-space-between align-center w-100">
+                <!-- Texto de "Mostrando X al Y de Z registros" -->
+                <span class="text-caption text-secondary">
+                    Mostrando {{ (page - 1) * itemsPerPage + 1 }} al
+                    {{ Math.min(page * itemsPerPage, totalItems) }} de {{ totalItems }} registros
+                </span>
 
-                <!-- buyer -->
-                <template #item.buyer.name="{ item }">
-                    <div class="d-flex align-center">
-                    <VAvatar
-                        size="1.875rem"
-                        :color="!item.buyer.avatar ? 'primary' : undefined"
-                        :variant="!item.buyer.avatar ? 'tonal' : undefined"
-                    >
-                        <VImg
-                        v-if="item.buyer.avatar"
-                        :src="item.buyer.avatar"
-                        />
-                        <span v-else>{{ item.buyer.name.slice(0, 2).toUpperCase() }}</span>
-                    </VAvatar>
-                    <span class="text-no-wrap font-weight-medium text-high-emphasis ms-2">{{ item.buyer.name }}</span>
-                    </div>
-                </template>
-
-                <!-- Payment -->
-                <template #item.payment="{ item }">
-                    <div class="d-flex flex-column">
-                    <div class="d-flex align-center">
-                        <span class="text-high-emphasis font-weight-medium">${{ item.payment.paidAmount }}</span>
-                        <span v-if="item.payment.paidAmount !== item.payment.total">/{{ item.payment.total }}</span>
-                    </div>
-                    <span class="text-xs text-no-wrap">{{ item.payment.receivedPaymentStatus }}</span>
-                    </div>
-                </template>
-
-                <!-- Status -->
-                <template #item.status="{ item }">
-                    <VChip
-                    :color="resolveStatusColor(item.payment.status)"
-                    :class="`text-${resolveStatusColor(item.payment.status)}`"
-                    size="small"
-                    class="font-weight-medium"
-                    >
-                    {{ item.payment.status }}
-                    </VChip>
-                </template>
-
-                <!-- Delete -->
-                <template #item.actions="{ item }">
-                    <VBtn
-                    icon
-                    size="small"
-                    color="medium-emphasis"
-                    variant="text"
-                    @click="editPermission(item.name)"
-                    >
-                    <VIcon
-                        size="22"
-                        icon="tabler-edit"
-                    />
-                    </VBtn>
-                    <IconBtn @click="deleteItem(item.product.id)">
-                    <VIcon icon="tabler-trash" />
-                    </IconBtn>
-                </template>
+                <!-- Paginación -->
+                <VPagination
+                    v-model="page"
+                    :length="Math.ceil(totalItems / itemsPerPage)"
+                    :total-visible="5"
+                    :show-first-last-page="false"
+                    active-color="info"
+                />
+                </div>
+            </div>
+         </template>
 
 
-                <!-- Paginacion -->
-                <template #bottom>
-                    <VCardText class="pt-2">
-                        <div class="d-flex flex-wrap justify-center justify-sm-space-between gap-y-2 mt-2">
 
-                            <div class="d-flex gap-2 align-center">
-                                <p class="text-body-1 mb-0">Mostrar</p>
-                                <AppSelect
-                                    :model-value="options.itemsPerPage"
-                                    :items="[5, 10, 25, 50, 100]"
-                                    style="inline-size: 5.5rem;"
-                                    @update:model-value="options.itemsPerPage = parseInt($event, 10)"
-                                />
-                                <p class="text-body-1 mb-0">Registros</p>
-                            </div>
+          <!-- Actions -->
+          <template #item.actions="{ item }">
+            <VBtn
+              icon
+              size="small"
+              color="medium-emphasis"
+              variant="text"
+              @click="editPermission(item.name)"
+            >
+              <VIcon
+                size="22"
+                icon="tabler-edit"
+              />
+            </VBtn>
+            <IconBtn>
+              <VIcon
+                icon="tabler-dots-vertical"
+                size="22"
+              />
+            </IconBtn>
+          </template>
 
-                            <VPagination
-                                v-model="options.page"
-                                active-color="info"
-                                :total-visible="$vuetify.display.smAndDown ? 3 : 5"
-                                :length="Math.ceil(permisos.length / options.itemsPerPage)"
-                                :show-first-last-page="false"
-                            />
-                        </div>
 
-                                <!-- ✅ Agregamos la información de paginación -->
-                        <!-- <p class="text-body-2 pt-2 text-muted">
-                            Mostrando {{ startRecord }} al {{ endRecord }} de {{ totalRecords }} registros
-                        </p> -->
 
-                    </VCardText>
-                </template>
-            </VDataTable>
-        </div>
-    </VCard>
+        </VDataTableServer>
+
+      </VCard>
+
+      <component :is="dynamicComponent" v-model:is-dialog-visible="isAddPermissionDialogVisible"/>
+
+
+      <!-- <AddEditPermissionComponentDialog
+        v-model:is-dialog-visible="isPermissionDialogVisible"
+        v-model:permission-name="permissionName"
+      />
+      <AddEditPermissionComponentDialog v-model:is-dialog-visible="isAddPermissionDialogVisible" /> -->
+    </VCol>
+
+
+  </VRow>
 </template>

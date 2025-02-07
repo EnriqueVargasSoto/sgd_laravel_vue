@@ -48,7 +48,6 @@ class PermisosController extends Controller
                 'draw' => intval($request->get('draw')),
                 'recordsTotal' => $permissions->total(),
                 'recordsFiltered' => $permissions->total(),
-                'headers' => $headers
             ]);
         } else {
             $permissions = $query->get();
@@ -57,7 +56,6 @@ class PermisosController extends Controller
                 'draw' => intval($request->get('draw')),
                 'recordsTotal' => $permissions->count(),
                 'recordsFiltered' => $permissions->count(),
-                'headers' => $headers
             ]);
         }
 
@@ -147,13 +145,35 @@ class PermisosController extends Controller
     }
 
     public function incializaTabla(){
+        $headers = [
+
+            ['title' => 'Nombres', 'key'=> 'name'],
+            ['title' => 'Roles', 'key'=> 'assignedTo', 'sortable' => false],
+            ['title' => 'Descripcion', 'key'=> 'description', 'sortable' => false],
+            ['title' => 'fecha', 'key'=> 'created_at', 'sortable' => false],
+            ['title' => 'Acciones', 'key'=> 'actions', 'sortable' => false],
+
+        ];
+
+        $buttons = [
+            [
+                'label' => 'Agregar Permiso',
+                'color' => 'info',
+                'icon' => 'tabler-plus',
+                'density' => 'default',
+                'action' => 'create'
+            ]
+        ];
+
         $data = [
-            'headers' => [],
+            'headers' => $headers,
             'par_page' => 10,
             'page' => 1,
             'title' => 'Permisos',
-            'buttons' => [],
-            'filters' => []
+            'buttons' => $buttons,
+            'filters' => [],
+            'check' => false
+
         ];
         return response()->json(['data'=>$data]);
     }
