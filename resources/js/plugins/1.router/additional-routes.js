@@ -78,6 +78,12 @@ export const routes = [
         meta: { requiresAuth: true } // Ruta protegida
     },
     {
+        path: '/modulos', // 📌 Asegúrate de que la ruta sea correcta
+        name: 'modulos',
+        component: () => import('@/views/modulos/Index.vue'),//DashboardAnalytics
+        meta: { requiresAuth: true } // Ruta protegida
+    },
+    {
         path: '/usuarios', // 📌 Asegúrate de que la ruta sea correcta
         name: 'usuarios',
         component: () => import('@/views/users/Index.vue'),//DashboardAnalytics

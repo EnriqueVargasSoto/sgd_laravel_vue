@@ -8,6 +8,7 @@ export const useApi = createFetch({
       Accept: 'application/json',
     },
   },
+
   options: {
     refetch: true,
     async beforeFetch({ options }) {
@@ -18,10 +19,11 @@ export const useApi = createFetch({
           Authorization: `Bearer ${accessToken}`,
         }
       }
-      
+
       return { options }
     },
     afterFetch(ctx) {
+
       const { data, response } = ctx
 
       // Parse data if it's JSON
@@ -32,7 +34,7 @@ export const useApi = createFetch({
       catch (error) {
         console.error(error)
       }
-      
+
       return { data: parsedData, response }
     },
   },

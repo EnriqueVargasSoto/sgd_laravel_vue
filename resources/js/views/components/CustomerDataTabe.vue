@@ -1,353 +1,324 @@
 <script setup>
-import dayjs from "dayjs";
-import { ref } from "vue";
+    import Swal from 'sweetalert2';
+    import dayjs from "dayjs";
 
-const props = defineProps({
-  endpoint: String, // Ruta API
-  dynamicComponent: {
-    type: Object,
-    required: true,
-  },
-});
-
-
-
-//Variables reactivas
-const search = ref('')
-const itemsPerPage = ref(10)
-const totalItems = computed(() => data.value.recordsTotal)
-const page = ref(1)
-const sortBy = ref()
-const orderBy = ref()
-const check = ref(false);
-
-//data obtenida del api
-const { data } = await useApi(createUrl(`/${props.endpoint}`, {
-  query: {
-    search,
-    per_page: itemsPerPage,
-    page,
-    //sortBy,
-    //orderBy,
-  },
-}))
-
-// Variables para la tabla
-const headers = ref([]);
-const buttons = ref([]);
-const filters = ref([]);
-const title = ref("Tabla");
-const tableData = computed(() => data.value.data)
-
-
-const updateOptions = options => {
-  sortBy.value = options.sortBy[0]?.key
-  orderBy.value = options.sortBy[0]?.order
-}
-
-const isPermissionDialogVisible = ref(false)
-const isAddPermissionDialogVisible = ref(false)
-const permissionName = ref('')
-
-const colors = {
-  'Editor': {
-    color: 'info',
-    text: 'Editor'//'Support',
-  },
-  'users': {
-    color: 'success',
-    text: 'Users',
-  },
-  'manager': {
-    color: 'warning',
-    text: 'Manager',
-  },
-  'Admin': {
-    color: 'primary',
-    text: 'Admin',
-  },
-  'restricted-user': {
-    color: 'error',
-    text: 'Restricted User',
-  },
-}
-
-// Función para inicializar la tabla (obtener configuración inicial)
-const fetchInitTabla = async () => {
-  try {
-    const { data } = await useApi(`/${props.endpoint}-inicializa-tabla`);
-
-    headers.value = data?.value.data?.headers || [];
-    buttons.value = data?.value.data?.buttons || [];
-    filters.value = data?.value.data?.filters || [];
-    title.value = data?.value.data?.title || "Tabla";
-    itemsPerPage.value = data?.value.data?.par_page || 10;
-    page.value = data?.value.data?.page || 1;
-    check.value = data?.value.data?.check || false;
-  } catch (error) {
-    console.error("Error al cargar la configuración de la tabla:", error);
-  }
-};
-
-// Función para obtener los datos paginados
-/* const fetchData = async () => {
-  try {
-    //loading.value = true;
-    const { data } = await useApi(`/${props.endpoint}`, {
-      query: {
-        search: search.value,
-        per_page: itemsPerPage.value,
-        page: page.value,
-      },
+    const props = defineProps({
+        endpoint: String, // Ruta API
+        dynamicComponent: {
+            type: Object,
+            required: true,
+        },
+        componentProps: {
+            type: Object,
+            default: () => ({}),
+        },
     });
 
-  } catch (error) {
-    console.error("Error al cargar los datos:", error);
-  } finally {
-    //loading.value = false;
-  }
-}; */
+    //Variables reactivas
+    const search = ref('')
+    const searchBool = ref(false)
+    const itemsPerPage = ref(10)
+    const totalItems = computed(() => data.value.recordsTotal)
+    const page = ref(1)
+    const check = ref(false);
+    const items_selects = ref([]);
 
-// Función para formatear la fecha
-const formatDate = (timestamp) => {
-  return dayjs(timestamp).format("DD/MM/YYYY");
-};
+    //data obtenida del api
+    const { data } = await useApi(createUrl(`/${props.endpoint}`, {query: {search, per_page: itemsPerPage, page},}))
+
+    // Variables para la tabla
+    const headers = ref([]);
+    const colors = ref({});
+    const buttons = ref([]);
+    const filters = ref([]);
+    const title = ref("Tabla");
+    const tableData = computed(() => data.value.data)
+
+    const totalPages = computed(() => {
+        console.log('length',data.value?.recordsTotal
+            ? Math.ceil(data.value.recordsTotal / itemsPerPage.value)
+            : 1 );
+        return data.value?.recordsTotal
+            ? Math.ceil(data.value.recordsTotal / itemsPerPage.value)
+            : 1; // Evita NaN si `data.value.total` no está definido
+    });
 
 
+    const isComponentVisible = ref(false);
 
+    // Función para inicializar la tabla (obtener configuración inicial)
+    const fetchInitTabla = async () => {
+        try {
+            const { data } = await useApi(`/${props.endpoint}-inicializa-tabla`);
 
+            headers.value = data?.value.data?.headers || [];
+            buttons.value = data?.value.data?.buttons || [];
+            filters.value = data?.value.data?.filters || [];
+            title.value = data?.value.data?.title || "Tabla";
+            itemsPerPage.value = data?.value.data?.par_page || 10;
+            page.value = data?.value.data?.page || 1;
+            check.value = data?.value.data?.check || false;
+            colors.value = data?.value.data?.colors || {};
+            searchBool.value = data?.value.data?.search || false;
+            items_selects.value = data?.value.data?.item_selects || [];
+            items_selects.value.push({ value: totalItems, title: 'Todos' });
+        } catch (error) {
+            console.error("Error al cargar la configuración de la tabla:", error);
+        }
+    };
 
+    const reloadTable = async () => {
+        console.log('Tabla recargada');
+        const response = await useApi(createUrl(`/${props.endpoint}`, {
+            query: { search, per_page: itemsPerPage, page },
+        }));
+        console.log('data: ',response.data.value);
+        data.value = response.data.value; // 🔹 Esto actualizará `tableData` automáticamente
+        //totalItems.value = 13//data.value.recordsTotal;
+    };
 
-//const headers = computed(() => permissionsData.value.headers)
+    // Función para formatear la fecha
+    const formatDate = (timestamp) => {
+    return dayjs(timestamp).format("DD/MM/YYYY");
+    };
 
+    const handleAction = (action) => {
 
-const editPermission = name => {
-  isPermissionDialogVisible.value = true
-  permissionName.value = name
-}
+        if (!action) {
+            isComponentVisible.value = true; // Muestra el componente dinámico
 
-const handleAction = (action) => {
-    console.log(action);
-    if (action === 'create') {
-        console.log(action);
-        isAddPermissionDialogVisible.value = true
-    }
-    // Puedes agregar más acciones aquí
-};
+            openModal(null);
+        } else {
+            isComponentVisible.value = true; // También puedes manejar para "edit"
+            openModal(action);
+        }
+    };
 
-// Llamar `fetchInitTabla` una vez al montar el componente
-onMounted(async () => {
-  await fetchInitTabla();
+    // Llamar `fetchInitTabla` una vez al montar el componente
+    onMounted(async () => {await fetchInitTabla();});
 
-});
-/* computed(async () => {
-    await fetchData();
-}); */
+    const emit = defineEmits(["update:componentProps"]);
+
+    // Estado local para manejar el modal
+    const localComponentProps = ref({ ...props.componentProps });
+
+    // Función para abrir el modal
+    const openModal = (dato) => {
+        localComponentProps.value.isDialogVisible = true;
+        //localComponentProps.value.permissionName = dato.name ?? '';
+        console.log('dato', dato);
+        localComponentProps.value.dato = dato;
+    };
+
+    // Función para cerrar el modal
+    const closeModal = () => {
+        localComponentProps.value.isDialogVisible = false;
+        emit("update:componentProps", { ...localComponentProps.value });
+    };
+
+    const eliminarRegistro = async (id) => {
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: '¡Esta acción no se puede deshacer!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33', // Rojo para "Eliminar"
+            cancelButtonColor: '#3085d6', // Azul para "Cancelar"
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    // Llamar a la API para eliminar el registro
+                    await useApi(`/${props.endpoint}/${id}`, {method: 'DELETE',});
+
+                    // Mostrar mensaje de éxito
+                    Swal.fire({
+                        title: '¡Eliminado!',
+                        text: 'El registro ha sido eliminado correctamente.',
+                        icon: 'success',
+                        confirmButtonColor: '#3085d6',
+                        confirmButtonText: 'OK'
+                    });
+
+                    // Emitir evento o actualizar lista de registros
+                    reloadTable()
+
+                } catch (error) {
+                    console.error('Error al eliminar:', error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'No se pudo eliminar el registro.',
+                        icon: 'error',
+                        confirmButtonColor: '#d33',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            }
+        });
+    };
 </script>
 
 <template>
-  <VRow>
-    <VCol cols="12">
-      <VCard>
-        <VCardItem>
-            <div class="d-flex align-center justify-space-between flex-wrap gap-4">
-                <!-- Titulo -->
-                <div class="d-flex gap-2 align-center">
-                    <VCardTitle>{{title}}</VCardTitle>
-                </div>
+    <VRow>
+        <VCol cols="12">
+            <VCard>
+                <VCardItem>
+                    <div class="d-flex align-center justify-space-between flex-wrap gap-4">
+                        <!-- Titulo -->
+                        <div class="d-flex gap-2 align-center">
+                            <VCardTitle>{{title}}</VCardTitle>
+                        </div>
 
-                <!-- Botones -->
-                <div class="d-flex align-center gap-4 flex-wrap">
+                        <!-- Botones -->
+                        <div class="d-flex align-center gap-4 flex-wrap">
 
-                    <!-- <VBtn
-                        density="default"
-                        prepend-icon="tabler-plus"
-                        @click="isAddPermissionDialogVisible = true"
-                    >
-                        Agregar Permiso
-                    </VBtn> -->
-
-                    <VBtn
-                        v-for="btn in buttons"
-                        :key="btn.action"
-                        :density="btn.density"
-                        :prepend-icon="btn.icon"
-                        :color="btn.color"
-                        @click="handleAction(btn.action)"
-                    >
-                        {{ btn.label }}
-                    </VBtn>
-                </div>
-            </div>
-
-        </VCardItem>
-        <VCardText class="d-flex align-center justify-space-between flex-wrap gap-4">
-          <!-- <div class="d-flex gap-2 align-center">
-            <p class="text-body-1 mb-0">
-              Ver
-            </p>
-            <AppSelect
-              :model-value="itemsPerPage"
-              :items="[
-                { value: 5, title: '5' },
-                { value: 25, title: '25' },
-                { value: 50, title: '50' },
-                { value: 100, title: '100' },
-                { value: totalPermissions, title: 'Todos' },
-              ]"
-              style="inline-size: 7.0rem;"
-              @update:model-value="itemsPerPage = parseInt($event, 10)"
-            />
-          </div> -->
-
-          <div class="d-flex align-center gap-4 flex-wrap">
-            <AppTextField
-              v-model="search"
-              placeholder="Buscar..."
-              style="inline-size: 15.625rem;"
-            />
-           <!--  <VBtn
-              density="default"
-              prepend-icon="tabler-plus"
-              @click="isAddPermissionDialogVisible = true"
-            >
-              Agregar Permiso
-            </VBtn> -->
-          </div>
-        </VCardText>
-
-        <VDivider />
-
-        <VDataTableServer
-          v-model:items-per-page="itemsPerPage"
-          v-model:page="page"
-          :items-length="totalItems"
-          :items-per-page-options="[
-            { value: 5, title: '5' },
-            { value: 10, title: '10' },
-            { value: -1, title: '$vuetify.dataFooter.itemsPerPageAll' },
-          ]"
-          :headers="headers"
-          :items="tableData"
-          :show-select="check"
-          prev-page-label="'Previous'"
-          item-value="name"
-          class="text-no-wrap"
-          @update:options="updateOptions"
-        >
-          <!-- Name -->
-          <template #item.name="{ item }">
-            <div class="text-high-emphasis text-body-1">
-              {{ item.name }}
-            </div>
-          </template>
-
-          <!-- Assigned To -->
-          <template #item.assignedTo="{ item }">
-            <div class="d-flex gap-4">
-              <VChip
-                v-for="text in item.roles"
-                :key="text"
-                label
-                size="small"
-                :color="colors[text.name].color"
-                class="font-weight-medium"
-              >
-                {{ colors[text.name].text }}
-                  <!-- {{ text.name }} -->
-              </VChip>
-            </div>
-          </template>
-
-          <!-- Name -->
-          <template #item.created_at="{ item }">
-            <!-- <div class="text-high-emphasis text-body-1"> -->
-              {{ formatDate(item.created_at) }}
-            <!-- </div> -->
-          </template>
-
-          <template #bottom>
-            <div class="d-flex flex-column pa-4" style="padding-left: 24px!important;padding-right: 24px!important;">
-                <!-- Select para la cantidad de registros por página -->
-                <div class="d-flex gap-2 align-center">
-                        <p class="text-body-1 mb-0">
-                        Ver
-                        </p>
-                        <AppSelect
-                        :model-value="itemsPerPage"
-                        :items="[
-                            { value: 5, title: '5' },
-                            { value: 10, title: '10' },
-                            { value: 25, title: '25' },
-                            { value: 50, title: '50' },
-                            { value: 100, title: '100' },
-                            { value: totalItems, title: 'Todos' },
-                        ]"
-                        style="inline-size: 7.0rem;"
-                        @update:model-value="itemsPerPage = parseInt($event, 10)"
-                        />
+                            <VBtn
+                                v-for="btn in buttons"
+                                :key="btn.action"
+                                :density="btn.density"
+                                :prepend-icon="btn.icon"
+                                :color="btn.color"
+                                @click="handleAction(null)"
+                            >
+                                {{ btn.label }}
+                            </VBtn>
+                        </div>
                     </div>
 
-                <!-- Texto de información y la paginación -->
-                <div class="d-flex justify-space-between align-center w-100">
-                <!-- Texto de "Mostrando X al Y de Z registros" -->
-                <span class="text-caption text-secondary">
-                    Mostrando {{ (page - 1) * itemsPerPage + 1 }} al
-                    {{ Math.min(page * itemsPerPage, totalItems) }} de {{ totalItems }} registros
-                </span>
+                </VCardItem>
 
-                <!-- Paginación -->
-                <VPagination
-                    v-model="page"
-                    :length="Math.ceil(totalItems / itemsPerPage)"
-                    :total-visible="5"
-                    :show-first-last-page="false"
-                    active-color="info"
-                />
-                </div>
-            </div>
-         </template>
+                <VCardText class="d-flex align-center justify-space-between flex-wrap gap-4">
 
+                    <div class="d-flex align-center gap-4 flex-wrap">
+                        <AppTextField
+                            v-if="searchBool"
+                            v-model="search"
+                            placeholder="Buscar..."
+                            style="inline-size: 15.625rem;"
+                        />
 
+                    </div>
+                </VCardText>
 
-          <!-- Actions -->
-          <template #item.actions="{ item }">
-            <VBtn
-              icon
-              size="small"
-              color="medium-emphasis"
-              variant="text"
-              @click="editPermission(item.name)"
-            >
-              <VIcon
-                size="22"
-                icon="tabler-edit"
-              />
-            </VBtn>
-            <IconBtn>
-              <VIcon
-                icon="tabler-dots-vertical"
-                size="22"
-              />
-            </IconBtn>
-          </template>
+                <VDivider />
 
+                <VDataTableServer
+                    v-model:items-per-page="itemsPerPage"
+                    v-model:page="page"
+                    :items-length="totalItems"
+                    :headers="headers"
+                    :items="tableData"
+                    :show-select="check"
+                    prev-page-label="'Previous'"
+                    item-value="name"
+                    class="text-no-wrap"
+                >
+                    <!-- Name -->
+                    <template #item.name="{ item }">
+                        <div class="text-high-emphasis text-body-1">
+                            {{ item.name }}
+                        </div>
+                    </template>
 
+                    <!-- Assigned To -->
+                    <template #item.assignedTo="{ item }">
+                        <div class="d-flex gap-4">
+                            <VChip
+                                v-for="text in item.roles"
+                                :key="text"
+                                label
+                                size="small"
+                                :color="colors[text.name].color"
+                                class="font-weight-medium"
+                            >
+                                {{ colors[text.name].text }}
+                            </VChip>
+                        </div>
+                    </template>
 
-        </VDataTableServer>
+                    <!-- Name -->
+                    <template #item.created_at="{ item }">
+                        {{ formatDate(item.created_at) }}
+                    </template>
 
-      </VCard>
+                    <template #bottom>
+                        <VDivider />
+                        <div class="d-flex flex-column pa-4" style="padding-left: 24px!important;padding-right: 24px!important;">
+                            <!-- Select para la cantidad de registros por página -->
+                            <div class="d-flex gap-2 align-center">
+                                <p class="text-body-1 mb-0">Ver</p>
+                                <AppSelect
+                                    :model-value="itemsPerPage"
+                                    :items="items_selects"
+                                    style="inline-size: 7.0rem;"
+                                    @update:model-value="itemsPerPage = parseInt($event, 10)"
+                                />
+                            </div>
 
-      <component :is="dynamicComponent" v-model:is-dialog-visible="isAddPermissionDialogVisible"/>
+                            <!-- Texto de información y la paginación -->
+                            <div class="d-flex justify-space-between align-center w-100">
+                                <!-- Texto de "Mostrando X al Y de Z registros" -->
+                                <span class="text-caption text-secondary">Mostrando {{ (page - 1) * itemsPerPage + 1 }} al {{ Math.min(page * itemsPerPage, totalItems) }} de {{ totalItems }} registros</span>
 
+                                <!-- Paginación -->
+                                <VPagination
+                                    v-model="page"
+                                    :length="totalPages"
+                                    :total-visible="5"
+                                    :show-first-last-page="false"
+                                    active-color="info"
+                                />
+                            </div>
+                        </div>
+                    </template>
 
-      <!-- <AddEditPermissionComponentDialog
-        v-model:is-dialog-visible="isPermissionDialogVisible"
-        v-model:permission-name="permissionName"
-      />
-      <AddEditPermissionComponentDialog v-model:is-dialog-visible="isAddPermissionDialogVisible" /> -->
-    </VCol>
+                    <!-- Actions -->
+                    <template #item.actions="{ item }">
+                        <VBtn
+                            icon
+                            size="small"
+                            color="medium-emphasis"
+                            variant="text"
+                            @click="handleAction(item)"
+                        >
+                            <VIcon
+                                size="22"
+                                icon="tabler-edit"
+                            />
+                        </VBtn>
+                        <VBtn
+                            icon
+                            size="small"
+                            color="medium-emphasis"
+                            variant="text"
+                            @click="eliminarRegistro(item.id)"
+                        >
+                            <VIcon
+                                icon="tabler-trash"
+                                size="22"
+                            />
+                        </VBtn>
+                        <!-- <IconBtn>
+                        <VIcon
+                            icon="tabler-dots-vertical"
+                            size="22"
+                        />
+                        </IconBtn> -->
+                    </template>
 
+                </VDataTableServer>
 
-  </VRow>
+            </VCard>
+
+            <!-- Componente dinámico -->
+            <component
+                :is="dynamicComponent"
+                v-bind="localComponentProps"
+                @update:is-dialog-visible="closeModal"
+                @refreshTable="reloadTable"
+            />
+
+        </VCol>
+    </VRow>
 </template>

@@ -25,6 +25,7 @@ Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
 Route::apiResource('permisos', PermisosController::class);
 Route::get('permisos-inicializa-tabla', [PermisosController::class, 'incializaTabla']);
 Route::apiResource('roles', RoleController::class);
-
+Route::get('roles-inicializa-tabla', [RoleController::class, 'incializaTabla']);
+Route::get('permisos-group', [RoleController::class, 'permisosGroup']);
 Route::post('login', [AuthController::class, 'login']);
 

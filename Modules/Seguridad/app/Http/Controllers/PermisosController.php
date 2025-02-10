@@ -146,13 +146,19 @@ class PermisosController extends Controller
 
     public function incializaTabla(){
         $headers = [
-
             ['title' => 'Nombres', 'key'=> 'name'],
             ['title' => 'Roles', 'key'=> 'assignedTo', 'sortable' => false],
             ['title' => 'Descripcion', 'key'=> 'description', 'sortable' => false],
             ['title' => 'fecha', 'key'=> 'created_at', 'sortable' => false],
             ['title' => 'Acciones', 'key'=> 'actions', 'sortable' => false],
+        ];
 
+        $colors = [
+            'Editor' => ['color' => 'info','text' => 'Editor'],
+            'users' => ['color' => 'success','text' => 'Users'],
+            'manager' => ['color' => 'warning','text' => 'Manager'],
+            'Admin' => ['color' => 'primary','text' => 'Admin'],
+            'restricted-user' => ['color' => 'error','text' => 'Restricted User'],
         ];
 
         $buttons = [
@@ -165,6 +171,14 @@ class PermisosController extends Controller
             ]
         ];
 
+        $itemSelects = [
+            ['title' => '5', 'value'=> 5],
+            ['title' => '10', 'value'=> 10],
+            ['title' => '25', 'value'=> 25],
+            ['title' => '50', 'value'=> 50],
+            ['title' => '100', 'value'=> 100],
+        ];
+
         $data = [
             'headers' => $headers,
             'par_page' => 10,
@@ -172,8 +186,10 @@ class PermisosController extends Controller
             'title' => 'Permisos',
             'buttons' => $buttons,
             'filters' => [],
-            'check' => false
-
+            'check' => false,
+            'colors' => $colors,
+            'search' => true,
+            'item_selects' => $itemSelects
         ];
         return response()->json(['data'=>$data]);
     }

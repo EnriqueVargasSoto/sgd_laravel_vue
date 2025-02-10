@@ -1,108 +1,180 @@
 <script setup>
-const props = defineProps({
-  isDialogVisible: {
-    type: Boolean,
-    required: true,
-  },
-  permissionName: {
-    type: String,
-    required: false,
-    default: '',
-  },
-})
+    import Swal from 'sweetalert2';
 
-const emit = defineEmits([
-  'update:isDialogVisible',
-  'update:permissionName',
-])
+    const props = defineProps({
+        endpoint: String, // Ruta API
+        isDialogVisible: {
+            type: Boolean,
+            required: true,
+        },
+        dato: {
+            type: Object,
+            default: () => ({}),
+        },
+    })
 
-const currentPermissionName = ref('')
+    const emit = defineEmits([
+        'update:isDialogVisible',
+        'update:permission',
+    ])
 
-const onReset = () => {
+    const name = ref('');
+    const description = ref('');
 
-  emit('update:isDialogVisible', false)
-  currentPermissionName.value = ''
-}
+    const onReset = () => {
 
-const onSubmit = () => {
-    console.log('la acciones es:', props.permissionName)
-  emit('update:isDialogVisible', false)
-  emit('update:permissionName', currentPermissionName.value)
-}
+    emit('update:isDialogVisible', false)
+        name.value = ''
+        description.value = ''
+    }
 
-watch(() => props, () => {
-  currentPermissionName.value = props.permissionName
-})
+    const onSubmit = async() => {
+
+        try {
+            if (!props.dato) {
+                const { data, error } = await useApi(`/${props.endpoint}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: name.value,
+                        description: description.value,
+                    }),
+                });
+
+
+                Swal.fire({
+                    title: '¡Éxito!',
+                    text: 'El permiso se ha agregado correctamente.',
+                    icon: 'success',
+                    confirmButtonText: 'OK',
+                    buttonsStyling: false, // Desactiva los estilos predeterminados
+                    customClass: {
+                        confirmButton: 'custom-ok-button'
+                    }
+                });
+
+                emit('refreshTable'); // Actualiza la tabla
+
+            } else {
+                const { data, error } = await useApi(`/${props.endpoint}/${props.dato.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: name.value,
+                        description: description.value,
+                    }),
+                });
+
+
+                Swal.fire({
+                    title: '¡Éxito!',
+                    text: 'El permiso se ha actualizado correctamente.',
+                    icon: 'success',
+                    confirmButtonText: 'OK',
+                    buttonsStyling: false, // Desactiva los estilos predeterminados
+                    customClass: {
+                        confirmButton: 'custom-ok-button'
+                    }
+                });
+
+                emit('refreshTable'); // Actualiza la tabla
+            }
+        } catch (error) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Hubo un problema al agregar el permiso.',
+                icon: 'error',
+                confirmButtonText: 'Intentar de nuevo',
+            });
+        } finally{
+            emit('refreshTable');
+            emit('update:isDialogVisible', false)
+            emit('update:permissionName', '')
+
+        }
+
+    }
+
+    watch(() => props.dato, (newDato) => {
+        name.value = newDato?.name || ''
+        description.value = newDato?.description || ''
+    }, { immediate: true }) // `immediate: true` para actualizar al inicio
+
 </script>
 
 <template>
-  <VDialog
-    :width="$vuetify.display.smAndDown ? 'auto' : 600"
-    :model-value="props.isDialogVisible"
-    @update:model-value="onReset"
-  >
-    <!-- 👉 dialog close btn -->
-    <DialogCloseBtn @click="onReset" />
+    <VDialog
+        :width="$vuetify.display.smAndDown ? 'auto' : 600"
+        :model-value="props.isDialogVisible"
+        @update:model-value="onReset"
+    >
+        <!-- 👉 dialog close btn -->
+        <DialogCloseBtn @click="onReset" />
 
-    <VCard class="pa-2 pa-sm-10">
-      <VCardText>
-        <!-- 👉 Title -->
-        <h4 class="text-h4 text-center mb-2">
-          {{ props.permissionName ? 'Editar' : 'Agregar' }} Permiso
-        </h4>
-        <p class="text-body-1 text-center mb-6">
-          {{ props.permissionName ? 'Editar' : 'Agregar' }}  permiso según sus requisitos.
-        </p>
+        <VCard class="pa-2 pa-sm-10">
+            <VCardText>
+                <!-- 👉 Title -->
+                <h4 class="text-h4 text-center mb-2">
+                    {{ props.dato ? 'Editar' : 'Agregar Nuevo' }} Permiso
+                </h4>
+                <p class="text-body-1 text-center mb-6">
+                    {{ props.dato ? 'Editar' : 'Agregar' }}  permiso según sus requisitos.
+                </p>
 
-        <!-- 👉 Form -->
-        <VForm  style="text-align: center;">
-          <VAlert
-            type="warning"
-            title="¡Advertencia!"
-            variant="tonal"
-            class="mb-6"
+                <!-- 👉 Form -->
+                <VForm  style="text-align: center;">
+                    <VAlert
+                        type="warning"
+                        title="¡Advertencia!"
+                        variant="tonal"
+                        class="mb-6"
 
-          >
-            <template #text>
-              Al {{ props.permissionName ? 'editar' : 'agregar' }} el nombre del permiso, es posible que se rompa la funcionalidad de permisos del sistema.
-            </template>
-          </VAlert>
+                    >
+                        <template #text>
+                            Al {{ props.dato ? 'editar' : 'agregar' }} el nombre del permiso, es posible que se rompa la funcionalidad de permisos del sistema.
+                        </template>
+                    </VAlert>
 
-          <!-- 👉 Role name -->
-          <div class="d-flex gap-4 mb-6 flex-wrap flex-column flex-sm-row">
-            <AppTextField
-              v-model="currentPermissionName"
-              placeholder="Nombre de Permiso"
-            />
+                    <!-- 👉 Role name -->
+                    <div class="d-flex gap-4 mb-6 flex-wrap flex-column flex-sm-row">
+                        <AppTextField
+                            v-model="name"
+                            placeholder="Nombre de Permiso"
+                        />
+                    </div>
+                    <!-- 👉 Role name -->
+                    <div class="d-flex gap-4 mb-6 flex-wrap flex-column flex-sm-row">
+                        <AppTextField
+                            v-model="description"
+                            placeholder="Descripcion de Permiso"
+                        />
+                    </div>
+                    <VBtn @click="onSubmit">
+                        {{ props.dato ? 'Actualizar' : 'Agregar' }}
+                    </VBtn>
 
-
-          </div>
-          <!-- 👉 Role name -->
-          <div class="d-flex gap-4 mb-6 flex-wrap flex-column flex-sm-row">
-            <AppTextField
-              v-model="currentPermissionName"
-              placeholder="Descripcion de Permiso"
-            />
-
-
-          </div>
-          <VBtn @click="onSubmit">
-              {{ props.permissionName ? 'Actualizar' : 'Agregar' }}
-            </VBtn>
-
-          <!-- <VCheckbox label="Set as core permission" /> -->
-        </VForm>
-      </VCardText>
-    </VCard>
-  </VDialog>
+                    <!-- <VCheckbox label="Set as core permission" /> -->
+                </VForm>
+            </VCardText>
+        </VCard>
+    </VDialog>
 </template>
 
 <style lang="scss">
-.permission-table {
-  td {
-    border-block-end: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
-    padding-block: 0.5rem;
-    padding-inline: 0;
-  }
-}
+    .permission-table {
+        td {
+            border-block-end: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+            padding-block: 0.5rem;
+            padding-inline: 0;
+        }
+    }
+
+    .custom-ok-button {
+        background-color: #28a745 !important; /* Verde éxito */
+        color: white !important;
+        font-weight: bold !important;
+        padding: 10px 20px !important;
+        border-radius: 5px !important;
+        border: none !important;
+    }
 </style>

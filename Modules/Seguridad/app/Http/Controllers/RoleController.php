@@ -52,8 +52,6 @@ class RoleController extends Controller
             ]);
         }
 
-
-
     }
 
     /**
@@ -102,6 +100,76 @@ class RoleController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function incializaTabla(){
+        $headers = [
+            ['title' => 'Rol', 'key'=> 'name'],
+            ['title' => 'Guard', 'key'=> 'guard_name', 'sortable' => false],
+            ['title' => 'Fecha', 'key'=> 'created_at', 'sortable' => false],
+            ['title' => 'Acciones', 'key'=> 'actions', 'sortable' => false],
+        ];
+
+        $colors = [
+            'Editor' => ['color' => 'info','text' => 'Editor'],
+            'users' => ['color' => 'success','text' => 'Users'],
+            'manager' => ['color' => 'warning','text' => 'Manager'],
+            'Admin' => ['color' => 'primary','text' => 'Admin'],
+            'restricted-user' => ['color' => 'error','text' => 'Restricted User'],
+        ];
+
+        $buttons = [
+            [
+                'label' => 'Agregar Rol',
+                'color' => 'info',
+                'icon' => 'tabler-plus',
+                'density' => 'default',
+                'action' => 'create'
+            ]
+        ];
+
+        $itemSelects = [
+            ['title' => '5', 'value'=> 5],
+            ['title' => '10', 'value'=> 10],
+            ['title' => '25', 'value'=> 25],
+            ['title' => '50', 'value'=> 50],
+            ['title' => '100', 'value'=> 100],
+        ];
+
+        $data = [
+            'headers' => $headers,
+            'par_page' => 10,
+            'page' => 1,
+            'title' => 'Roles',
+            'buttons' => $buttons,
+            'filters' => [],
+            'check' => true,
+            'colors' => $colors,
+            'search' => true,
+            'item_selects' => $itemSelects
+        ];
+        return response()->json(['data'=>$data]);
+    }
+
+    public function permisosGroup(){
+        $permissions = Permission::orderBy('id', 'asc')->get();
+
+        $agrupados = [];
+
+        foreach ($permissions as $permiso) {
+            // Extraemos el tipo (usuario, rol, permiso) y la acción (listar, crear, etc.)
+            list($categoria, $accion) = explode('-', $permiso['name']);
+
+            // Crear un array por cada categoría (usuarios, roles, permisos)
+            // Agrupar los permisos por categoría
+            $agrupados[$categoria][] = [
+                'id' => $permiso['id'],
+                'accion' => $accion
+            ];
+
+        }
+
+        return response()->json(['data' => $agrupados]);
     }
 
 }

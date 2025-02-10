@@ -1,6 +1,26 @@
 <script setup>
 import RoleCards from '@/views/roles-permisos/roles/RoleCards.vue'
 import UserList from '@/views/roles-permisos/roles/UserList.vue'
+
+import AddEditPermissionDialog from '../permisos/components/AddEditPermissionComponentDialog.vue'; // Asegúrate de importar el componente
+import AddEditRoleDialog from './components/AddEditRoleDialog.vue';
+
+const permisos = ref([]);
+
+const fetchPermisos = async () => {
+    try {
+        const { data } = await useApi(`/permisos-group`);
+
+        permisos.value = data.value.data;
+
+    } catch (error) {
+        console.error("Error al cargar la configuración de la tabla:", error);
+    }
+};
+
+ // Llamar `fetchInitTabla` una vez al montar el componente
+ onMounted(async () => {await fetchPermisos();});
+
 </script>
 
 <template>
@@ -30,7 +50,16 @@ import UserList from '@/views/roles-permisos/roles/UserList.vue'
 
     <VCol cols="12">
       <!-- 👉 User List  -->
-      <UserList />
+      <!-- <UserList /> -->
+      <CustomerDataTabe endpoint="roles"
+            :dynamic-component="AddEditRoleDialog"
+            :component-props="{
+                isDialogVisible: false,
+                endpoint: 'roles',
+                permisos: permisos
+            }"
+            @refreshTable="reloadTable"
+        />
     </VCol>
   </VRow>
 </template>

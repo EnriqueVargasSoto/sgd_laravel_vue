@@ -10,15 +10,15 @@ trait RecordsAuditLogs
     {
         // Registrar creación
         static::created(function ($model) {
-            //if (Auth::check()) {
+            if (Auth::check()) {
                 // Registrar log de creación
                 $model->recordAuditLog('create', $model->getAttributes());
-            //}
+            }
         });
 
         // Registrar actualización
         static::updated(function ($model) {
-            //if (Auth::check()) {
+            if (Auth::check()) {
                 $changes = $model->getChanges();
                 if (!empty($changes)) {
                     // Registrar log de actualización con valores antiguos y nuevos
@@ -27,15 +27,15 @@ trait RecordsAuditLogs
                         'new' => $changes, // Nuevos valores
                     ]);
                 }
-            //}
+            }
         });
 
         // Registrar eliminación
         static::deleted(function ($model) {
-            //if (Auth::check()) {
+            if (Auth::check()) {
                 // Registrar log de eliminación con los valores originales
                 $model->recordAuditLog('delete', $model->getOriginal());
-            //}
+            }
         });
     }
 
