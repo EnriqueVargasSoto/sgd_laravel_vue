@@ -9,10 +9,10 @@ const permisos = ref([]);
 
 const fetchPermisos = async () => {
     try {
-        const { data } = await useApi(`/permisos-group`);
+        const { data } = await useApi(`/modulos`);
 
         permisos.value = data.value.data;
-
+        console.log('permisos:', permisos)
     } catch (error) {
         console.error("Error al cargar la configuración de la tabla:", error);
     }
@@ -24,42 +24,43 @@ const fetchPermisos = async () => {
 </script>
 
 <template>
-  <VRow>
-    <VCol cols="12">
-      <h4 class="text-h4 mb-1">
-        Roles List
-      </h4>
-      <p class="text-body-1 mb-0">
-        A role provided access to predefined menus and features so that depending on assigned role an administrator can have access to what he need
-      </p>
-    </VCol>
+    <VRow>
+        <!-- <VCol cols="12">
+        <h4 class="text-h4 mb-1">
+            Roles List
+        </h4>
+        <p class="text-body-1 mb-0">
+            A role provided access to predefined menus and features so that depending on assigned role an administrator can have access to what he need
+        </p>
+        </VCol> -->
 
-    <!-- 👉 Roles Cards -->
-    <VCol cols="12">
-      <RoleCards />
-    </VCol>
+        <!-- 👉 Roles Cards -->
+        <!-- <VCol cols="12">
+        <RoleCards />
+        </VCol> -->
 
-    <VCol cols="12">
-      <h4 class="text-h4 mb-1 mt-6">
-        Total users with their roles
-      </h4>
-      <p class="text-body-1 mb-0">
-        Find all of your company’s administrator accounts and their associate roles.
-      </p>
-    </VCol>
+        <!-- <VCol cols="12">
+        <h4 class="text-h4 mb-1 mt-6">
+            Total users with their roles
+        </h4>
+        <p class="text-body-1 mb-0">
+            Find all of your company’s administrator accounts and their associate roles.
+        </p>
+        </VCol> -->
 
-    <VCol cols="12">
-      <!-- 👉 User List  -->
-      <!-- <UserList /> -->
-      <CustomerDataTabe endpoint="roles"
-            :dynamic-component="AddEditRoleDialog"
-            :component-props="{
-                isDialogVisible: false,
-                endpoint: 'roles',
-                permisos: permisos
-            }"
-            @refreshTable="reloadTable"
-        />
-    </VCol>
-  </VRow>
+        <VCol cols="12">
+        <!-- 👉 User List  -->
+        <!-- <UserList /> -->
+        <CustomerDataTabe endpoint="roles"
+                :dynamic-component="AddEditRoleDialog"
+                :component-props="{
+                    isDialogVisible: false,
+                    endpoint: 'roles',
+                    permisos: permisos
+                }"
+                @refreshTable="reloadTable"
+            />
+        </VCol>
+    </VRow>
+
 </template>

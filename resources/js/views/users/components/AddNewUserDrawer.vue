@@ -2,14 +2,15 @@
 import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
 
 const props = defineProps({
-  isDrawerOpen: {
+
+  isDialogVisible: {
     type: Boolean,
     required: true,
   },
 })
 
 const emit = defineEmits([
-  'update:isDrawerOpen',
+  'update:isDialogVisible',
   'userData',
 ])
 
@@ -27,7 +28,7 @@ const status = ref()
 
 // 👉 drawer close
 const closeNavigationDrawer = () => {
-  emit('update:isDrawerOpen', false)
+  emit('update:isDialogVisible', false)
   nextTick(() => {
     refForm.value?.reset()
     refForm.value?.resetValidation()
@@ -50,7 +51,7 @@ const onSubmit = () => {
         avatar: '',
         billing: 'Auto Debit',
       })
-      emit('update:isDrawerOpen', false)
+      emit('update:isDialogVisible', false)
       nextTick(() => {
         refForm.value?.reset()
         refForm.value?.resetValidation()
@@ -60,7 +61,7 @@ const onSubmit = () => {
 }
 
 const handleDrawerModelValueUpdate = val => {
-  emit('update:isDrawerOpen', val)
+  emit('update:isDialogVisible', val)
 }
 </script>
 
@@ -71,7 +72,7 @@ const handleDrawerModelValueUpdate = val => {
     :width="400"
     location="end"
     class="scrollable-content"
-    :model-value="props.isDrawerOpen"
+    :model-value="props.isDialogVisible"
     @update:model-value="handleDrawerModelValueUpdate"
   >
     <!-- 👉 Title -->

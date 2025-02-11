@@ -14,10 +14,12 @@ return new class extends Migration
         Schema::create('modulos', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('slug');
             $table->text('description')->nullable();
             $table->string('url')->nullable();
             $table->foreignId('parent_id')->nullable()->constrained('modulos')->onDelete('cascade');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

@@ -27,8 +27,11 @@ return new class extends Migration
         Schema::create($tableNames['permissions'], function (Blueprint $table) {
             //$table->engine('InnoDB');
             $table->bigIncrements('id'); // permission id
+            $table->foreignId('modulo_id')->constrained('modulos')->onDelete('cascade'); // Relación con Modulo
             $table->string('name');       // For MyISAM use string('name', 225); // (or 166 for InnoDB with Redundant/Compact row format)
+            $table->string('slug')->nullable();
             $table->string('guard_name'); // For MyISAM use string('guard_name', 25);
+            $table->text('description')->nullable();
             $table->timestamps();
             $table->softDeletes();
             $table->unique(['name', 'guard_name']);
@@ -43,6 +46,7 @@ return new class extends Migration
             }
             $table->string('name');       // For MyISAM use string('name', 225); // (or 166 for InnoDB with Redundant/Compact row format)
             $table->string('guard_name'); // For MyISAM use string('guard_name', 25);
+            $table->text('description')->nullable();
             $table->timestamps();
             if ($teams || config('permission.testing')) {
                 $table->unique([$columnNames['team_foreign_key'], 'name', 'guard_name']);

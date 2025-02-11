@@ -13,22 +13,12 @@ class PermisosController extends Controller
      */
     public function index(Request $request)
     {
-
-        $headers = [
-
-            ['title' => 'Nombres', 'key'=> 'name'],
-            ['title' => 'Roles', 'key'=> 'assignedTo', 'sortable' => false],
-            ['title' => 'Descripcion', 'key'=> 'description', 'sortable' => false],
-            ['title' => 'fecha', 'key'=> 'created_at', 'sortable' => false],
-            ['title' => 'Acciones', 'key'=> 'actions', 'sortable' => false],
-
-        ];
         // Obtener los parámetros de paginación de la solicitud
         $page = $request->get('page', 1);
         $perPage = $request->get('per_page');
         $search = $request->get('search');
 
-        $query = Permission::with('roles')->orderBy('id', 'asc');
+        $query = Permission::with('roles','modulo')->orderBy('id', 'asc');
 
         // Aplicar la búsqueda si se proporciona un término
         if ($search) {
@@ -116,6 +106,7 @@ class PermisosController extends Controller
         //
         try {
             $permission = Permission::find($id);
+            $permission->modulo_id = $request->modulo_id;
             $permission->name = $request->name;
             $permission->description = $request->description;
             $permission->save();
@@ -146,6 +137,7 @@ class PermisosController extends Controller
 
     public function incializaTabla(){
         $headers = [
+            ['title' => 'Modulo', 'key'=> 'modulo'],
             ['title' => 'Nombres', 'key'=> 'name'],
             ['title' => 'Roles', 'key'=> 'assignedTo', 'sortable' => false],
             ['title' => 'Descripcion', 'key'=> 'description', 'sortable' => false],

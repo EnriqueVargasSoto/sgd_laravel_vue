@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 // use Modules\Seguridad\Database\Factories\ModuloFactory;
 
 use App\Traits\RecordsAuditLogs;
+use Spatie\Permission\Models\Permission;
 
 class Modulo extends Model
 {
@@ -17,7 +18,7 @@ class Modulo extends Model
      * The attributes that are mass assignable.
      */
     protected $table = 'modulos'; // Nombre de la tabla
-    protected $fillable = ['nombre', 'descripcion', 'url', 'parent_id'];
+    protected $fillable = ['name', 'slug', 'description', 'url', 'parent_id'];
 
     /**
      * Relación: Un módulo puede tener múltiples submódulos.
@@ -35,6 +36,9 @@ class Modulo extends Model
         return $this->belongsTo(Modulo::class, 'parent_id');
     }
 
+    public function permisos() {
+        return $this->hasMany(Permission::class);
+    }
     // protected static function newFactory(): ModuloFactory
     // {
     //     // return ModuloFactory::new();

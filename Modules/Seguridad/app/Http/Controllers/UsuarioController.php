@@ -3,10 +3,10 @@
 namespace Modules\Seguridad\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Modules\Seguridad\Models\Modulo;
 
-class ModuloController extends Controller
+class UsuarioController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -19,7 +19,7 @@ class ModuloController extends Controller
             $perPage = $request->get('per_page');
             $search = $request->get('search');
 
-            $query = Modulo::with('submodulos', 'moduloPadre', 'permisos')->orderBy('id', 'asc');
+            $query = User::with('roles')->orderBy('id', 'asc');
 
             // Aplicar la búsqueda si se proporciona un término
             if ($search) {
@@ -33,20 +33,20 @@ class ModuloController extends Controller
 
             // Si se proporciona perPage, aplicar paginación, de lo contrario traer todo
             if ($perPage) {
-                $modulos = $query->paginate($perPage, '*', 'page', $page);
+                $usuarios = $query->paginate($perPage, '*', 'page', $page);
                 return response()->json([
-                    'data' => $modulos->items(),
+                    'data' => $usuarios->items(),
                     'draw' => intval($request->get('draw')),
-                    'recordsTotal' => $modulos->total(),
-                    'recordsFiltered' => $modulos->total(),
+                    'recordsTotal' => $usuarios->total(),
+                    'recordsFiltered' => $usuarios->total(),
                 ]);
             } else {
-                $modulos = $query->get();
+                $usuarios = $query->get();
                 return response()->json([
-                    'data' => $modulos,
+                    'data' => $usuarios,
                     'draw' => intval($request->get('draw')),
-                    'recordsTotal' => $modulos->count(),
-                    'recordsFiltered' => $modulos->count(),
+                    'recordsTotal' => $usuarios->count(),
+                    'recordsFiltered' => $usuarios->count(),
                 ]);
             }
         } catch (\Error $e) {
@@ -69,13 +69,6 @@ class ModuloController extends Controller
     public function store(Request $request)
     {
         //
-        try {
-            $modulo = Modulo::create($request->all());
-            return response()->json(['data' => $modulo]);
-        } catch (\Error $e) {
-            //throw $th;
-            return response()->json(['error', $e]);
-        }
     }
 
     /**
@@ -100,20 +93,6 @@ class ModuloController extends Controller
     public function update(Request $request, $id)
     {
         //
-        try {
-            $modulo = Modulo::find($id);
-            $modulo->parent_id = $request->parent_id;
-            $modulo->name = $request->name;
-            $modulo->slug = $request->slug;
-            $modulo->url = $request->url;
-            $modulo->description = $request->description;
-            $modulo->save();
-
-            return response()->json(['data' => $modulo]);
-        } catch (\Error $e) {
-            //throw $th;
-            return response()->json(['error', $e]);
-        }
     }
 
     /**
@@ -122,25 +101,15 @@ class ModuloController extends Controller
     public function destroy($id)
     {
         //
-        try {
-            $modulo = Modulo::findOrFail($id);
-            $modulo->delete();
-
-            return response()->json(['data' => 'registro '.$modulo->name.' eliminado']);
-        } catch (\Error $e) {
-            //throw $th;
-            return response()->json(['error', $e]);
-        }
     }
 
     public function incializaTabla(){
         $headers = [
-            ['title' => 'Nombres', 'key'=> 'name'],
-            ['title' => 'Slug', 'key'=> 'slug', 'sortable' => false],
-            ['title' => 'Descripcion', 'key'=> 'description', 'sortable' => false],
-            ['title' => 'Url', 'key'=> 'url', 'sortable' => false],
-            ['title' => 'Modulo Padre', 'key'=> 'parent_id', 'sortable' => false],
-            ['title' => 'fecha', 'key'=> 'created_at', 'sortable' => false],
+            ['title' => 'Usuario', 'key'=> 'name'],
+            ['title' => 'Rol', 'key'=> 'roles'],
+            ['title' => 'Estado', 'key'=> 'status', 'sortable' => false],
+            /* ['title' => 'Descripcion', 'key'=> 'description', 'sortable' => false], */
+            ['title' => 'Fecha', 'key'=> 'created_at', 'sortable' => false],
             ['title' => 'Acciones', 'key'=> 'actions', 'sortable' => false],
         ];
 
@@ -154,7 +123,7 @@ class ModuloController extends Controller
 
         $buttons = [
             [
-                'label' => 'Agregar Modulo',
+                'label' => 'Agregar Usuario',
                 'color' => 'info',
                 'icon' => 'tabler-plus',
                 'density' => 'default',
@@ -174,7 +143,7 @@ class ModuloController extends Controller
             'headers' => $headers,
             'par_page' => 10,
             'page' => 1,
-            'title' => 'Modulos',
+            'title' => 'Usuarios',
             'buttons' => $buttons,
             'filters' => [],
             'check' => false,

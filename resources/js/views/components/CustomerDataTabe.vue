@@ -35,9 +35,6 @@
     const tableData = computed(() => data.value.data)
 
     const totalPages = computed(() => {
-        console.log('length',data.value?.recordsTotal
-            ? Math.ceil(data.value.recordsTotal / itemsPerPage.value)
-            : 1 );
         return data.value?.recordsTotal
             ? Math.ceil(data.value.recordsTotal / itemsPerPage.value)
             : 1; // Evita NaN si `data.value.total` no está definido
@@ -68,25 +65,23 @@
     };
 
     const reloadTable = async () => {
-        console.log('Tabla recargada');
         const response = await useApi(createUrl(`/${props.endpoint}`, {
             query: { search, per_page: itemsPerPage, page },
         }));
-        console.log('data: ',response.data.value);
+
         data.value = response.data.value; // 🔹 Esto actualizará `tableData` automáticamente
         //totalItems.value = 13//data.value.recordsTotal;
     };
 
     // Función para formatear la fecha
     const formatDate = (timestamp) => {
-    return dayjs(timestamp).format("DD/MM/YYYY");
+        return dayjs(timestamp).format("DD/MM/YYYY");
     };
 
     const handleAction = (action) => {
 
         if (!action) {
             isComponentVisible.value = true; // Muestra el componente dinámico
-
             openModal(null);
         } else {
             isComponentVisible.value = true; // También puedes manejar para "edit"
@@ -105,8 +100,6 @@
     // Función para abrir el modal
     const openModal = (dato) => {
         localComponentProps.value.isDialogVisible = true;
-        //localComponentProps.value.permissionName = dato.name ?? '';
-        console.log('dato', dato);
         localComponentProps.value.dato = dato;
     };
 
@@ -145,7 +138,7 @@
                     reloadTable()
 
                 } catch (error) {
-                    console.error('Error al eliminar:', error);
+
                     Swal.fire({
                         title: 'Error',
                         text: 'No se pudo eliminar el registro.',
@@ -215,9 +208,31 @@
                     class="text-no-wrap"
                 >
                     <!-- Name -->
+                    <template #item.modulo="{ item }">
+                        <div class="text-high-emphasis text-body-1">
+                            {{ item.modulo.name }}
+                        </div>
+                    </template>
+
+                    <!-- Name -->
                     <template #item.name="{ item }">
                         <div class="text-high-emphasis text-body-1">
                             {{ item.name }}
+                        </div>
+                    </template>
+
+                    <!-- 👉 Role -->
+                    <template #item.roles="{ item }">
+                        <div class="d-flex align-center gap-x-2">
+                            <VIcon
+                            :size="22"
+                            :icon="resolveUserRoleVariant(item.role).icon"
+                            :color="resolveUserRoleVariant(item.role).color"
+                            />
+
+                            <div class="text-capitalize text-high-emphasis text-body-1">
+                            {{ item.role }}
+                            </div>
                         </div>
                     </template>
 
@@ -229,10 +244,10 @@
                                 :key="text"
                                 label
                                 size="small"
-                                :color="colors[text.name].color"
+                                :color="colors[text.name] ? colors[text.name].color : colors['manager'].color"
                                 class="font-weight-medium"
                             >
-                                {{ colors[text.name].text }}
+                                {{ colors[text.name] ? colors[text.name].text : colors['manager'].text }}
                             </VChip>
                         </div>
                     </template>
@@ -240,6 +255,11 @@
                     <!-- Name -->
                     <template #item.created_at="{ item }">
                         {{ formatDate(item.created_at) }}
+                    </template>
+
+                    <!-- parent -->
+                    <template #item.parent_id="{ item }">
+                        {{ item.modulo_padre ? item.modulo_padre.name :'' }}
                     </template>
 
                     <template #bottom>

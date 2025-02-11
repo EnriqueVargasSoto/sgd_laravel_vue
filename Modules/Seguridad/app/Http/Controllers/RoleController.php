@@ -14,42 +14,47 @@ class RoleController extends Controller
      */
     public function index(Request $request)
     {
-        //return view('seguridad::index');
-        // Obtener los parámetros de paginación de la solicitud
-        $page = $request->get('page', 1);
-        $perPage = $request->get('per_page');
-        $search = $request->get('search');
+        try {
+            //return view('seguridad::index');
+            // Obtener los parámetros de paginación de la solicitud
+            $page = $request->get('page', 1);
+            $perPage = $request->get('per_page');
+            $search = $request->get('search');
 
-        $query = Role::with('permissions')->orderBy('id', 'asc');
+            $query = Role::with('permissions')->orderBy('id', 'asc');
 
-        // Aplicar la búsqueda si se proporciona un término
-        if ($search) {
-            $query->where(function ($query) use ($search) {
-                $query->where('name', 'like', '%' . $search . '%');
-                    /* ->orWhereHas('roles', function ($query) use ($search) {
-                        $query->where('name', 'like', '%' . $search . '%');
-                    }); */
-            });
-        }
+            // Aplicar la búsqueda si se proporciona un término
+            if ($search) {
+                $query->where(function ($query) use ($search) {
+                    $query->where('name', 'like', '%' . $search . '%');
+                        /* ->orWhereHas('roles', function ($query) use ($search) {
+                            $query->where('name', 'like', '%' . $search . '%');
+                        }); */
+                });
+            }
 
-        if ($perPage) {
-            $roles = $query->paginate($perPage, '*', 'page', $page);
+            if ($perPage) {
+                $roles = $query->paginate($perPage, '*', 'page', $page);
 
-            return response()->json([
-                'data' => $roles->items(),
-                'draw' => intval($request->get('draw')),
-                'recordsTotal' => $roles->total(),
-                'recordsFiltered' => $roles->total(), // Si tienes filtrado
-            ]);
-        } else {
-            $roles = $query->get();
+                return response()->json([
+                    'data' => $roles->items(),
+                    'draw' => intval($request->get('draw')),
+                    'recordsTotal' => $roles->total(),
+                    'recordsFiltered' => $roles->total(), // Si tienes filtrado
+                ]);
+            } else {
+                $roles = $query->get();
 
-            return response()->json([
-                'data' => $roles,
-                'draw' => intval($request->get('draw')),
-                'recordsTotal' => $roles->count(),
-                'recordsFiltered' => $roles->count(), // Si tienes filtrado
-            ]);
+                return response()->json([
+                    'data' => $roles,
+                    'draw' => intval($request->get('draw')),
+                    'recordsTotal' => $roles->count(),
+                    'recordsFiltered' => $roles->count(), // Si tienes filtrado
+                ]);
+            }
+        } catch (\Error $e) {
+            //throw $th;
+            return response()->json(['error', $e]);
         }
 
     }
@@ -68,7 +73,31 @@ class RoleController extends Controller
     public function store(Request $request)
     {
         //
+        try {
+            //code...
+
+            $modulos = $request->permissions; // Lista de módulos recibida
+
+            $selectedPermissionIds = collect($modulos)
+                ->flatMap(function ($modulo) {
+                    return isset($modulo['permisos'])
+                        ? collect($modulo['permisos'])->where('selected', true)->pluck('id')
+                        : [];
+                })
+                ->unique()
+                ->values()
+                ->all();
+
+            $role = Role::create(['name' => $request->name]);
+            $role->syncPermissions($selectedPermissionIds);
+
+            return response()->json(['data' => $role]);
+        } catch (\Error $e) {
+            //throw $th;
+            return response()->json(['error', $e]);
+        }
     }
+
 
     /**
      * Show the specified resource.
@@ -92,6 +121,32 @@ class RoleController extends Controller
     public function update(Request $request, $id)
     {
         //
+        try {
+            //code...
+            $modulos = $request->permissions; // Lista de módulos recibida
+
+            $selectedPermissionIds = collect($modulos)
+                ->flatMap(function ($modulo) {
+                    return isset($modulo['permisos'])
+                        ? collect($modulo['permisos'])->where('selected', true)->pluck('id')
+                        : [];
+                })
+                ->unique()
+                ->values()
+                ->all();
+
+            $role = Role::findById($id);
+            $role->name = $request->name;
+            $role->save();
+            //$role = Role::create(['name' => $request->name]);
+            $role->syncPermissions($selectedPermissionIds);
+            //$role->syncPermissions($selectedPermissionIds); // Actualizar permisos del rol
+
+            return response()->json(['data' => $role]);
+        } catch (\Error $e) {
+            //throw $th;
+            return response()->json(['error', $e]);
+        }
     }
 
     /**
@@ -100,6 +155,15 @@ class RoleController extends Controller
     public function destroy($id)
     {
         //
+        try {
+            $rol = Role::findOrFail($id);
+            $rol->delete();
+
+            return response()->json(['data' => 'registro '.$rol->name.' eliminado']);
+        } catch (\Error $e) {
+            //throw $th;
+            return response()->json(['error', $e]);
+        }
     }
 
     public function incializaTabla(){

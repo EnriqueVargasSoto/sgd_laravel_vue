@@ -1,169 +1,205 @@
 <script setup>
-import { VForm } from 'vuetify/components/VForm'
+    import Swal from 'sweetalert2';
 
-const props = defineProps({
-    rolePermissions: {
-        type: Object,
-        required: false,
-        default: () => ({
-        name: '',
-        permissions: [],
-        }),
-    },
-    isDialogVisible: {
-        type: Boolean,
-        required: true,
-    },
-    permisos: {
-        type: Object,
-        required: false,
-        default: () => ({
-        name: '',
-        permissions: [],
-        }),
-    },
-    dato: {
-        type: Object,
-        default: () => ({}),
-    },
-})
-
-const emit = defineEmits([
-  'update:isDialogVisible',
-  'update:rolePermissions',
-])
-
-const permissions = ref([
-  {
-    name: 'User Management',
-    read: false,
-    write: false,
-    create: false,
-  },
-  {
-    name: 'Content Management',
-    read: false,
-    write: false,
-    create: false,
-  },
-  {
-    name: 'Disputes Management',
-    read: false,
-    write: false,
-    create: false,
-  },
-  {
-    name: 'Database Management',
-    read: false,
-    write: false,
-    create: false,
-  },
-  {
-    name: 'Financial Management',
-    read: false,
-    write: false,
-    create: false,
-  },
-  {
-    name: 'Reporting',
-    read: false,
-    write: false,
-    create: false,
-  },
-  {
-    name: 'API Control',
-    read: false,
-    write: false,
-    create: false,
-  },
-  {
-    name: 'Repository Management',
-    read: false,
-    write: false,
-    create: false,
-  },
-  {
-    name: 'Payroll',
-    read: false,
-    write: false,
-    create: false,
-  },
-])
-
-const isSelectAll = ref(false)
-const role = ref('')
-const name = ref('')
-const refPermissionForm = ref()
-
-const checkedCount = computed(() => {
-  let counter = 0
-  permissions.value.forEach(permission => {
-    Object.entries(permission).forEach(([key, value]) => {
-      if (key !== 'name' && value)
-        counter++
+    const props = defineProps({
+        endpoint: String, // Ruta API
+        isDialogVisible: {
+            type: Boolean,
+            required: true,
+        },
+        /* permisos: {
+            type: Object,
+            default: () => ([]),
+        }, */
+        dato: {
+            type: Object,
+            default: () => ({}),
+        },
     })
-  })
 
-  return counter
-})
+    const emit = defineEmits([
+    'update:isDialogVisible',
+    'update:rolePermissions',
+    ])
 
-const isIndeterminate = computed(() => checkedCount.value > 0 && checkedCount.value < permissions.value.length * 3)
+    const permissions = ref([]);// await useApi(createUrl(`/modulos`))
 
-watch(isSelectAll, val => {
-  permissions.value = permissions.value.map(permission => ({
-    ...permission,
-    read: val,
-    write: val,
-    create: val,
-  }))
-})
-watch(isIndeterminate, () => {
-  if (!isIndeterminate.value)
-    isSelectAll.value = false
-})
-watch(permissions, () => {
-  if (checkedCount.value === permissions.value.length * 3)
-    isSelectAll.value = true
-}, { deep: true })
-watch(() => props, () => {
-  if (props.rolePermissions && props.rolePermissions.permissions.length) {
-    role.value = props.rolePermissions.name
-    permissions.value = permissions.value.map(permission => {
-      const rolePermission = props.rolePermissions?.permissions.find(item => item.name === permission.name)
-      if (rolePermission) {
-        return {
-          ...permission,
-          ...rolePermission,
+    const isSelectAll = ref(false)
+    const role = ref('')
+    const name = ref('')
+    const refPermissionForm = ref()
+
+    const checkedCount = computed(() => {
+        let counter = 0
+        permissions.value.forEach(permission => {
+            Object.entries(permission).forEach(([key, value]) => {
+            if (key !== 'name' && value)
+                counter++
+            })
+        })
+
+        return counter
+    })
+
+    const isIndeterminate = computed(() => checkedCount.value > 0 && checkedCount.value < permissions.value.length * 3)
+
+    watch(isSelectAll, val => {
+        console.log('val: ', val);
+        permissions.value = permissions.value.map( modulo => ({
+            ...modulo,
+            permisos: modulo.permisos.map( permiso => ({
+                ...permiso,
+                selected: val
+            }))
+        }));
+    })
+
+    watch(isIndeterminate, () => {
+        if (!isIndeterminate.value)
+            isSelectAll.value = false
+    })
+
+    watch(permissions, () => {
+    /* if (checkedCount.value === permissions.value.length * 3)
+        isSelectAll.value = true */
+    }, { deep: true })
+
+    watch(() => props, () => {
+        if (props.dato && props.dato.permisos.length) {
+            role.value = props.rolePermissions.name
+            console.log('rol: ', props.rolePermissions);
+            /* permissions.value = permissions.value.map(permission => {
+            const rolePermission = props.rolePermissions?.permissions.find(item => item.name === permission.name)
+            if (rolePermission) {
+                return {
+                ...permission,
+                ...rolePermission,
+                }
+            }
+
+            return permission
+            }) */
         }
-      }
-
-      return permission
     })
-  }
-})
 
-const onSubmit = () => {
-  const rolePermissions = {
-    name: role.value,
-    permissions: permissions.value,
-  }
+    const onSubmit = async () => {
+        const rolePermissions = {
+            name: name.value,
+            permissions: permissions.value,
+        }
+        console.log('permiso para mandar a guardar: ', rolePermissions);
+        try {
+            if (!props.dato) {
+                const { data, error } = await useApi(`/${props.endpoint}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(rolePermissions),
+                });
 
-  emit('update:rolePermissions', rolePermissions)
-  emit('update:isDialogVisible', false)
-  isSelectAll.value = false
-  refPermissionForm.value?.reset()
-}
 
-const onReset = () => {
-  emit('update:isDialogVisible', false)
-  isSelectAll.value = false
-  refPermissionForm.value?.reset()
-}
+                Swal.fire({
+                    title: '¡Éxito!',
+                    text: 'El rol se ha agregado correctamente.',
+                    icon: 'success',
+                    confirmButtonText: 'OK',
+                    buttonsStyling: false, // Desactiva los estilos predeterminados
+                    customClass: {
+                        confirmButton: 'custom-ok-button'
+                    }
+                });
+
+                emit('refreshTable'); // Actualiza la tabla
+
+            } else {
+                const { data, error } = await useApi(`/${props.endpoint}/${props.dato.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(rolePermissions),
+                });
+
+
+                Swal.fire({
+                    title: '¡Éxito!',
+                    text: 'El rol se ha actualizado correctamente.',
+                    icon: 'success',
+                    confirmButtonText: 'OK',
+                    buttonsStyling: false, // Desactiva los estilos predeterminados
+                    customClass: {
+                        confirmButton: 'custom-ok-button'
+                    }
+                });
+
+                emit('refreshTable'); // Actualiza la tabla
+            }
+        } catch (error) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Hubo un problema al agregar el rol.',
+                icon: 'error',
+                confirmButtonText: 'Intentar de nuevo',
+            });
+        } finally{
+            emit('update:rolePermissions', rolePermissions)
+            emit('update:isDialogVisible', false)
+            isSelectAll.value = false
+            refPermissionForm.value?.reset()
+        }
+        /* emit('update:rolePermissions', rolePermissions)
+        emit('update:isDialogVisible', false)
+        isSelectAll.value = false
+        refPermissionForm.value?.reset() */
+    }
+
+    const onReset = () => {
+        emit('update:isDialogVisible', false)
+        isSelectAll.value = false
+        refPermissionForm.value?.reset()
+    }
 
     watch(() => props.dato, (newDato) => {
+        console.log('dato: ', newDato?.permissions);
         name.value = newDato?.name || ''
-        //description.value = newDato?.description || ''
+
+        permissions.value = permissions.value.map( modulo => ({
+            ...modulo,
+            permisos: modulo.permisos.map( permiso => {
+                const rolePermission = newDato?.permissions.find(item => item.id === permiso.id)
+                console.log('permission: ', permiso);
+                console.log('se encontro el rol: ', rolePermission);
+
+                if (rolePermission) {
+
+                   permiso.selected = true;
+                }
+
+                return permiso
+            })
+        }));
+
     }, { immediate: true }) // `immediate: true` para actualizar al inicio
+
+    const fetchPermisos = async () => {
+        //isSelectAll.value = false
+        try {
+            const { data } = await useApi(`/modulos`);
+
+            permissions.value = data.value.data.map( modulo => ({
+                ...modulo,
+                permisos: modulo.permisos.map( permiso => ({
+                    ...permiso,
+                    selected: false
+                }))
+            }));
+
+            console.log('permisos:', permissions)
+        } catch (error) {
+            console.error("Error al cargar la configuración de la tabla:", error);
+        }
+    };
+
+    // Llamar `fetchInitTabla` una vez al montar el componente
+    onMounted(async () => {await fetchPermisos();});
+
 </script>
 
 <template>
@@ -203,7 +239,7 @@ const onReset = () => {
                                     Administrator Access
                                 </h6>
                             </td>
-                            <td colspan="3">
+                            <td colspan="4">
                                 <div class="d-flex justify-end">
                                     <VCheckbox
                                         v-model="isSelectAll"
@@ -215,7 +251,7 @@ const onReset = () => {
                         </tr>
 
                         <!-- 👉 Other permission loop -->
-                        <template
+                        <!-- <template
                             v-for="permission in permissions"
                             :key="permission.name"
                         >
@@ -250,17 +286,30 @@ const onReset = () => {
                                     </div>
                                 </td>
                             </tr>
-                        </template>
+                        </template> -->
 
+                        <!-- 👉 Other permission loop -->
                         <template
-                            v-for="(acciones, categoria) in permisos"
-                            :key="categoria"
+                            v-for="modulo in permissions"
+
+                            :key="modulo.name"
                         >
-                            <tr>
+                            <tr v-if="modulo.submodulos.length == 0">
                                 <td>
                                     <h6 class="text-h6">
-                                        {{ categoria }}
+                                        {{ modulo.name }}
                                     </h6>
+                                </td>
+                                <td
+                                    v-for="permission in modulo.permisos"
+                                    :key="permission.id"
+                                >
+                                    <div class="d-flex justify-end">
+                                        <VCheckbox
+                                        v-model="permission.selected"
+                                        :label="permission.slug"
+                                        />
+                                    </div>
                                 </td>
                                 <!-- <td>
                                     <div class="d-flex justify-end">
@@ -288,6 +337,8 @@ const onReset = () => {
                                 </td> -->
                             </tr>
                         </template>
+
+
 
                     </VTable>
 

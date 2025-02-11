@@ -18,8 +18,10 @@
         'update:permission',
     ])
 
-    const modulo_id = ref(null);
+    const parent_id = ref(null);
     const name = ref('');
+    const slug = ref('');
+    const url = ref('');
     const description = ref('');
 
     const modulos = ref([]);
@@ -37,13 +39,15 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        modulo_id: modulo_id.value,
+                        parent_id: parent_id.value,
                         name: name.value,
                         slug: name.value,
+                        url: url.value,
                         description: description.value,
                     }),
                 });
 
+                await fetchModulos();
 
                 Swal.fire({
                     title: '¡Éxito!',
@@ -63,13 +67,13 @@
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        modulo_id: modulo_id.value,
+                        parent_id: parent_id.value,
                         name: name.value,
                         slug: name.value,
+                        url: url.value,
                         description: description.value,
                     }),
                 });
-
 
                 Swal.fire({
                     title: '¡Éxito!',
@@ -98,16 +102,19 @@
         }
     }
 
-    watch(() => props.dato, (newDato) => {
+    watch(() => props.dato, async (newDato) => {
+
         name.value = newDato?.name || ''
+        slug.value = newDato?.slug || ''
+        url.value = newDato?.url || ''
         description.value = newDato?.description || ''
-        modulo_id.value = newDato?.modulo_id || null
+        parent_id.value = newDato?.parent_id || null
     }, { immediate: true }) // `immediate: true` para actualizar al inicio
 
     const fetchModulos = async () => {
         try {
             const { data } = await useApi(`/modulos`);
-            modulos.value = data.value.data.filter(item => item.submodulos.length === 0);
+            modulos.value = data.value.data;
         } catch (error) {
             console.error("Error al cargar la configuración de la tabla:", error);
         }
@@ -130,10 +137,10 @@
             <VCardText>
                 <!-- 👉 Title -->
                 <h4 class="text-h4 text-center mb-2">
-                    {{ props.dato ? 'Editar' : 'Agregar Nuevo' }} Permiso
+                    {{ props.dato ? 'Editar' : 'Agregar Nuevo' }} Modulo
                 </h4>
                 <p class="text-body-1 text-center mb-6">
-                    {{ props.dato ? 'Editar' : 'Agregar' }}  permiso según sus requisitos.
+                    {{ props.dato ? 'Editar' : 'Agregar' }} modulo según sus requisitos.
                 </p>
 
                 <!-- 👉 Form -->
@@ -146,28 +153,46 @@
 
                     >
                         <template #text>
-                            Al {{ props.dato ? 'editar' : 'agregar' }} el nombre del permiso, es posible que se rompa la funcionalidad de permisos del sistema.
+                            Al {{ props.dato ? 'editar' : 'agregar' }} el nombre del modulo, es posible que se rompa la funcionalidad de modulos del sistema.
                         </template>
                     </VAlert>
 
                     <!-- 👉 Role name -->
                     <div class="d-flex gap-4 mb-6 flex-wrap flex-column flex-sm-row">
+                        <AppTextField
+                            v-model="name"
+                            placeholder="Nombre de Modulo"
+                        />
+                    </div>
+
+                    <!-- 👉 Role name -->
+                    <div class="d-flex gap-4 mb-6 flex-wrap flex-column flex-sm-row">
+                        <AppTextField
+                            v-model="slug"
+                            placeholder="Slug de Modulo"
+                        />
+                    </div>
+
+                    <!-- 👉 Role name -->
+                    <div class="d-flex gap-4 mb-6 flex-wrap flex-column flex-sm-row">
+                        <AppTextField
+                            v-model="url"
+                            placeholder="URL de Modulo"
+                        />
+                    </div>
+
+                    <!-- 👉 Role name -->
+                    <div class="d-flex gap-4 mb-6 flex-wrap flex-column flex-sm-row">
 
                         <AppSelect
-                            v-model="modulo_id"
+                            v-model="parent_id"
                             :items="modulos"
                             item-title="name"
                             item-value="id"
                             placeholder="Modulo"
                         />
                     </div>
-                    <!-- 👉 Role name -->
-                    <div class="d-flex gap-4 mb-6 flex-wrap flex-column flex-sm-row">
-                        <AppTextField
-                            v-model="name"
-                            placeholder="Nombre de Permiso"
-                        />
-                    </div>
+
                     <!-- 👉 Role name -->
                     <div class="d-flex gap-4 mb-6 flex-wrap flex-column flex-sm-row">
                         <AppTextarea

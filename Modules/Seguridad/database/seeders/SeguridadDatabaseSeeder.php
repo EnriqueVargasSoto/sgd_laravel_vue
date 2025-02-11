@@ -12,5 +12,7 @@ class SeguridadDatabaseSeeder extends Seeder
     public function run(): void
     {
         // $this->call([]);
+        $this->call(ModuleTableSeeder::class);
+        $this->call(CreateAdminUserSeeder::class);
     }
 }

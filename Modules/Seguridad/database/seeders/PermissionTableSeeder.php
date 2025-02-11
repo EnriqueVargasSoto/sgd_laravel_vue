@@ -13,7 +13,7 @@ class PermissionTableSeeder extends Seeder
     public function run(): void
     {
         // $this->call([]);
-        $permissions = [
+        /* $permissions = [
             'rol-listar',
             'rol-crear',
             'rol-editar',
@@ -30,6 +30,6 @@ class PermissionTableSeeder extends Seeder
 
         foreach ($permissions as $permission) {
             Permission::create(['name' => $permission]);
-        }
+        } */
     }
 }
