@@ -1,72 +1,72 @@
 <!-- ❗Errors in the form are set on line 60 -->
 <script setup>
-import { VForm } from 'vuetify/components/VForm'
-import AuthProvider from '@/views/login/AuthProvider.vue'
-import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
-import authV2LoginIllustrationBorderedDark from '@images/pages/auth-v2-login-illustration-bordered-dark.png'
-import authV2LoginIllustrationBorderedLight from '@images/pages/auth-v2-login-illustration-bordered-light.png'
-import authV2LoginIllustrationDark from '@images/pages/auth-v2-login-illustration-dark.png'
-import authV2LoginIllustrationLight from '@images/pages/auth-v2-login-illustration-light.png'
-import authV2MaskDark from '@images/pages/misc-mask-dark.png'
-import authV2MaskLight from '@images/pages/misc-mask-light.png'
-import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
-import { themeConfig } from '@themeConfig'
+    import { VForm } from 'vuetify/components/VForm'
+    import AuthProvider from '@/views/login/AuthProvider.vue'
+    import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
+    import authV2LoginIllustrationBorderedDark from '@images/pages/auth-v2-login-illustration-bordered-dark.png'
+    import authV2LoginIllustrationBorderedLight from '@images/pages/auth-v2-login-illustration-bordered-light.png'
+    import authV2LoginIllustrationDark from '@images/pages/auth-v2-login-illustration-dark.png'
+    import authV2LoginIllustrationLight from '@images/pages/auth-v2-login-illustration-light.png'
+    import authV2MaskDark from '@images/pages/misc-mask-dark.png'
+    import authV2MaskLight from '@images/pages/misc-mask-light.png'
+    import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
+    import { themeConfig } from '@themeConfig'
 
-const authThemeImg = useGenerateImageVariant(authV2LoginIllustrationLight, authV2LoginIllustrationDark, authV2LoginIllustrationBorderedLight, authV2LoginIllustrationBorderedDark, true)
-const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
+    const authThemeImg = useGenerateImageVariant(authV2LoginIllustrationLight, authV2LoginIllustrationDark, authV2LoginIllustrationBorderedLight, authV2LoginIllustrationBorderedDark, true)
+    const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
 
-definePage({
-  meta: {
-    layout: 'blank',
-    unauthenticatedOnly: true,
-  },
-})
-
-const isPasswordVisible = ref(false)
-const route = useRoute()
-const router = useRouter()
-const ability = useAbility()
-
-const errors = ref({
-  email: undefined,
-  password: undefined,
-})
-
-const refVForm = ref()
-
-const credentials = ref({
-  email: 'admin@demo.com',
-  password: 'admin',
-})
-
-const rememberMe = ref(false)
-
-const login = async () => {
-  try {
-    const res = await $api('/auth/login', {
-      method: 'POST',
-      body: {
-        email: credentials.value.email,
-        password: credentials.value.password,
-      },
-      onResponseError({ response }) {
-        errors.value = response._data.errors
-      },
+    definePage({
+        meta: {
+            layout: 'blank',
+            unauthenticatedOnly: true,
+        },
     })
 
-    const { accessToken, userData, userAbilityRules } = res
+    const isPasswordVisible = ref(false)
+    const route = useRoute()
+    const router = useRouter()
+    const ability = useAbility()
 
-    useCookie('userAbilityRules').value = userAbilityRules
-    ability.update(userAbilityRules)
-    useCookie('userData').value = userData
-    useCookie('accessToken').value = accessToken
-    await nextTick(() => {
-      router.replace(route.query.to ? String(route.query.to) : '/')
+    const errors = ref({
+        email: undefined,
+        password: undefined,
     })
-  } catch (err) {
-    console.error(err)
-  }
-}
+
+    const refVForm = ref()
+
+    const credentials = ref({
+        email: 'admin@demo.com',
+        password: 'admin',
+    })
+
+    const rememberMe = ref(false)
+
+    const login = async () => {
+        try {
+            const res = await $api('/auth/login', {
+                method: 'POST',
+                body: {
+                    email: credentials.value.email,
+                    password: credentials.value.password,
+                },
+                onResponseError({ response }) {
+                    errors.value = response._data.errors
+                },
+            })
+
+            const { accessToken, userData, userAbilityRules } = res
+
+            useCookie('userAbilityRules').value = userAbilityRules
+            ability.update(userAbilityRules)
+            useCookie('userData').value = userData
+            useCookie('accessToken').value = accessToken
+            await nextTick(() => {
+                router.replace(route.query.to ? String(route.query.to) : '/')
+            })
+        } catch (err) {
+            console.error(err)
+        }
+    }
 
 const onSubmit = () => {
   refVForm.value?.validate().then(({ valid: isValid }) => {

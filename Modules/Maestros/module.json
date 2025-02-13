@@ -1,0 +1,11 @@
+{
+    "name": "Maestros",
+    "alias": "maestros",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Maestros\\Providers\\MaestrosServiceProvider"
+    ],
+    "files": []
+}

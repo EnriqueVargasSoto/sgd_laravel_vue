@@ -1,6 +1,6 @@
 export default [
   /* { heading: 'Apps & Pages' }, */
-  { heading: 'Seguridad' },
+  /* { heading: 'Seguridad' }, */
   /* {
     title: 'Ecommerce',
     icon: { icon: 'tabler-shopping-cart' },
@@ -97,22 +97,84 @@ export default [
 </svg>
   }, */
   {
+    title: 'Seguridad',
+    icon: { icon: 'tabler-shield-lock' },
+    //to: 'seguridad',
+    children: [
+        {
+            title: 'Modulos',
+            /* icon: { icon: 'tabler-box' }, */
+            to: 'modulos'
+        },
+        {
+            title: 'Usuarios',
+            /* icon: { icon: 'tabler-user' }, */
+            to: 'usuarios'
+        },
+        {
+            title: 'Roles & Permisos',
+            /* icon: { icon: 'tabler-lock' }, */
+            children: [
+              { title: 'Roles', to: 'roles' },
+              { title: 'Permisos', to: 'permisos' },
+            ],
+        },
+    ]
+  },
+  {
+    title: 'Maestros',
+    icon: { icon: 'tabler-layout-kanban' },
+    //to: 'seguridad',
+    children: [
+        {
+            title: 'Oficinas',
+            /* icon: { icon: 'tabler-box' }, */
+            to: 'oficinas'
+        },
+        {
+            title: 'Tipo de Documentos',
+            /* icon: { icon: 'tabler-user' }, */
+            to: 'tipo-documentos'
+        },
+        {
+            title: 'Tipo de Movimientos',
+            /* icon: { icon: 'tabler-user' }, */
+            to: 'tipo-movimientos'
+        },
+        {
+            title: 'Areas',
+            /* icon: { icon: 'tabler-user' }, */
+            to: 'areas'
+        },
+        {
+            title: 'Estados',
+            /* icon: { icon: 'tabler-user' }, */
+            to: 'estados'
+        },
+        {
+            title: 'Importancias',
+            /* icon: { icon: 'tabler-user' }, */
+            to: 'importancias'
+        },
+        /* {
+            title: 'Roles & Permisos',
+            icon: { icon: 'tabler-lock' },
+            children: [
+              { title: 'Roles', to: 'roles' },
+              { title: 'Permisos', to: 'permisos' },
+            ],
+        }, */
+    ]
+  },
+  /* {
     title: 'Modulos',
     icon: { icon: 'tabler-box' },
     to: 'modulos'
-    /* children: [
-      { title: 'List', to: 'apps-user-list' },
-      { title: 'View', to: { name: 'apps-user-view-id', params: { id: 21 } } },
-    ], */
   },
   {
     title: 'Usuarios',
     icon: { icon: 'tabler-user' },
     to: 'usuarios'
-    /* children: [
-      { title: 'List', to: 'apps-user-list' },
-      { title: 'View', to: { name: 'apps-user-view-id', params: { id: 21 } } },
-    ], */
   },
   {
     title: 'Roles & Permisos',
@@ -121,7 +183,7 @@ export default [
       { title: 'Roles', to: 'roles' },
       { title: 'Permisos', to: 'permisos' },
     ],
-  },
+  }, */
   /* {
     title: 'Pages',
     icon: { icon: 'tabler-file' },

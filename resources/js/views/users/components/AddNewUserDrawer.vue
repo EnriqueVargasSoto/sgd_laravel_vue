@@ -1,214 +1,392 @@
 <script setup>
-import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
+    import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
+    import Swal from 'sweetalert2';
 
-const props = defineProps({
+    const props = defineProps({
+        endpoint: String, // Ruta API
+        isDialogVisible: {
+            type: Boolean,
+            required: true,
+        },
+        dato: {
+            type: Object,
+            default: () => ({}),
+        },
+    })
 
-  isDialogVisible: {
-    type: Boolean,
-    required: true,
-  },
-})
+    const emit = defineEmits([
+        'update:isDialogVisible',
+        'userData',
+    ])
 
-const emit = defineEmits([
-  'update:isDialogVisible',
-  'userData',
-])
+    const isFormValid = ref(false)
+    const refForm = ref()
+    const fullName = ref('')
+    const name = ref('')
+    const lastname = ref('')
+    const rol_id = ref()
+    const userName = ref('')
+    const email = ref('')
+    const company = ref('')
+    const country = ref()
+    const contact = ref('')
+    const role = ref()
+    const plan = ref()
+    const status = ref()
 
-const isFormValid = ref(false)
-const refForm = ref()
-const fullName = ref('')
-const userName = ref('')
-const email = ref('')
-const company = ref('')
-const country = ref()
-const contact = ref('')
-const role = ref()
-const plan = ref()
-const status = ref()
+    const password = ref();
+    const isPasswordVisible = ref(false)
 
-// 👉 drawer close
-const closeNavigationDrawer = () => {
-  emit('update:isDialogVisible', false)
-  nextTick(() => {
-    refForm.value?.reset()
-    refForm.value?.resetValidation()
-  })
-}
+    const roles = ref([]);
 
-const onSubmit = () => {
-  refForm.value?.validate().then(({ valid }) => {
-    if (valid) {
-      emit('userData', {
-        id: 0,
-        fullName: fullName.value,
-        company: company.value,
-        role: role.value,
-        country: country.value,
-        contact: contact.value,
-        email: email.value,
-        currentPlan: plan.value,
-        status: status.value,
-        avatar: '',
-        billing: 'Auto Debit',
-      })
-      emit('update:isDialogVisible', false)
-      nextTick(() => {
-        refForm.value?.reset()
-        refForm.value?.resetValidation()
-      })
+    // 👉 drawer close
+    const closeNavigationDrawer = () => {
+        emit('update:isDialogVisible', false)
+        nextTick(() => {
+            refForm.value?.reset()
+            refForm.value?.resetValidation()
+        })
     }
-  })
-}
 
-const handleDrawerModelValueUpdate = val => {
-  emit('update:isDialogVisible', val)
-}
+    const onSubmit = async() => {
+        refForm.value?.validate().then(async({ valid }) => {
+            const dataForm = {
+                name: name.value,
+                lastname: lastname.value,
+                email: email.value,
+                rol_id: rol_id.value,
+                password: password.value
+            };
+            console.log('data: ', dataForm);
+
+            try {
+                if (!props.dato) {
+                    const { data, error } = await useApi(`/${props.endpoint}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            name: name.value,
+                            lastname: lastname.value,
+                            email: email.value,
+                            rol_id: rol_id.value,
+                            password: password.value
+                        }),
+                    });
+
+
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: 'El permiso se ha agregado correctamente.',
+                        icon: 'success',
+                        confirmButtonText: 'OK',
+                        buttonsStyling: false, // Desactiva los estilos predeterminados
+                        customClass: {
+                            confirmButton: 'custom-ok-button'
+                        }
+                    });
+
+                    emit('refreshTable'); // Actualiza la tabla
+
+                } else {
+                    const { data, error } = await useApi(`/${props.endpoint}/${props.dato.id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            name: name.value,
+                            lastname: lastname.value,
+                            email: email.value,
+                            rol_id: rol_id.value,
+                            password: password.value
+                        }),
+                    });
+
+
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: 'El permiso se ha actualizado correctamente.',
+                        icon: 'success',
+                        confirmButtonText: 'OK',
+                        buttonsStyling: false, // Desactiva los estilos predeterminados
+                        customClass: {
+                            confirmButton: 'custom-ok-button'
+                        }
+                    });
+
+                    emit('refreshTable'); // Actualiza la tabla
+                }
+            } catch (error) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Hubo un problema al agregar el permiso.',
+                    icon: 'error',
+                    confirmButtonText: 'Intentar de nuevo',
+                });
+            } finally{
+                /* emit('refreshTable');
+                emit('update:isDialogVisible', false)
+                emit('update:permissionName', '') */
+                emit('userData', {
+                    id: 0,
+                    fullName: fullName.value,
+                    company: company.value,
+                    role: role.value,
+                    country: country.value,
+                    contact: contact.value,
+                    email: email.value,
+                    currentPlan: plan.value,
+                    status: status.value,
+                    avatar: '',
+                    billing: 'Auto Debit',
+                })
+                emit('update:isDialogVisible', false)
+                nextTick(() => {
+                    refForm.value?.reset()
+                    refForm.value?.resetValidation()
+                })
+            }
+
+            /* if (valid) {
+                emit('userData', {
+                    id: 0,
+                    fullName: fullName.value,
+                    company: company.value,
+                    role: role.value,
+                    country: country.value,
+                    contact: contact.value,
+                    email: email.value,
+                    currentPlan: plan.value,
+                    status: status.value,
+                    avatar: '',
+                    billing: 'Auto Debit',
+                })
+                emit('update:isDialogVisible', false)
+                nextTick(() => {
+                    refForm.value?.reset()
+                    refForm.value?.resetValidation()
+                })
+            } */
+        })
+    }
+
+    const handleDrawerModelValueUpdate = val => {
+        emit('update:isDialogVisible', val)
+    }
+
+    watch(() => props.dato, (newDato) => {
+
+        console.log(newDato);
+        name.value = newDato?.name || ''
+        lastname.value = newDato?.lastname || ''
+        email.value = newDato?.email || ''
+        rol_id.value = (newDato?.roles && newDato.roles.length > 0) ? newDato.roles[0].id : null;//newDato?.roles[0].id || null
+    }, { immediate: true }) // `immediate: true` para actualizar al inicio
+
+    const fetchRoles = async () => {
+        //isSelectAll.value = false
+        try {
+            const { data } = await useApi(`/roles`);
+
+            roles.value = data.value.data;
+
+            console.log('roles:', roles.value[0])
+        } catch (error) {
+            console.error("Error al cargar la configuración de la tabla:", error);
+        }
+    };
+
+    // Llamar `fetchInitTabla` una vez al montar el componente
+    onMounted(async () => {await fetchRoles();});
 </script>
 
 <template>
-  <VNavigationDrawer
-    data-allow-mismatch
-    temporary
-    :width="400"
-    location="end"
-    class="scrollable-content"
-    :model-value="props.isDialogVisible"
-    @update:model-value="handleDrawerModelValueUpdate"
-  >
-    <!-- 👉 Title -->
-    <AppDrawerHeaderSection
-      title="Add New User"
-      @cancel="closeNavigationDrawer"
-    />
+    <VNavigationDrawer
+        data-allow-mismatch
+        temporary
+        :width="400"
+        location="end"
+        class="scrollable-content"
+        :model-value="props.isDialogVisible"
+        @update:model-value="handleDrawerModelValueUpdate"
+    >
+        <!-- 👉 Title -->
+        <AppDrawerHeaderSection
+            :title="props.dato ? 'Editar Usuario' : 'Agregar Nuevo Usuario'"
+            @cancel="closeNavigationDrawer"
+        />
 
-    <VDivider />
+        <VDivider />
 
-    <PerfectScrollbar :options="{ wheelPropagation: false }">
-      <VCard flat>
-        <VCardText>
-          <!-- 👉 Form -->
-          <VForm
-            ref="refForm"
-            v-model="isFormValid"
-            @submit.prevent="onSubmit"
-          >
-            <VRow>
-              <!-- 👉 Full name -->
-              <VCol cols="12">
-                <AppTextField
-                  v-model="fullName"
-                  :rules="[requiredValidator]"
-                  label="Full Name"
-                  placeholder="John Doe"
-                />
-              </VCol>
+        <PerfectScrollbar :options="{ wheelPropagation: false }">
+            <VCard flat>
+                <VCardText>
+                    <!-- 👉 Form -->
+                    <VForm
+                        ref="refForm"
+                        v-model="isFormValid"
+                        @submit.prevent="onSubmit"
+                    >
+                        <VRow>
+                            <!-- 👉 Full name -->
+                            <VCol cols="12">
+                                <AppTextField
+                                    v-model="name"
+                                    :rules="[requiredValidator]"
+                                    label="Nombres"
+                                    placeholder="Nombres"
+                                />
+                            </VCol>
 
-              <!-- 👉 Username -->
-              <VCol cols="12">
-                <AppTextField
-                  v-model="userName"
-                  :rules="[requiredValidator]"
-                  label="Username"
-                  placeholder="Johndoe"
-                />
-              </VCol>
+                            <!-- 👉 Full name -->
+                            <VCol cols="12">
+                                <AppTextField
+                                    v-model="lastname"
+                                    :rules="[requiredValidator]"
+                                    label="Apellidos"
+                                    placeholder="Apellidos"
+                                />
+                            </VCol>
 
-              <!-- 👉 Email -->
-              <VCol cols="12">
-                <AppTextField
-                  v-model="email"
-                  :rules="[requiredValidator, emailValidator]"
-                  label="Email"
-                  placeholder="johndoe@email.com"
-                />
-              </VCol>
+                            <!-- 👉 Username -->
+                            <!-- <VCol cols="12">
+                                <AppTextField
+                                    v-model="userName"
+                                    :rules="[requiredValidator]"
+                                    label="Email"
+                                    placeholder="Email"
+                                />
+                            </VCol> -->
 
-              <!-- 👉 company -->
-              <VCol cols="12">
-                <AppTextField
-                  v-model="company"
-                  :rules="[requiredValidator]"
-                  label="Company"
-                  placeholder="PixInvent"
-                />
-              </VCol>
+                            <!-- 👉 Email -->
+                            <VCol cols="12">
+                                <AppTextField
+                                    v-model="email"
+                                    :rules="[requiredValidator, emailValidator]"
+                                    label="Email"
+                                    placeholder="johndoe@email.com"
+                                />
+                            </VCol>
 
-              <!-- 👉 Country -->
-              <VCol cols="12">
-                <AppSelect
-                  v-model="country"
-                  label="Select Country"
-                  placeholder="Select Country"
-                  :rules="[requiredValidator]"
-                  :items="['USA', 'UK', 'India', 'Australia']"
-                />
-              </VCol>
+                            <!-- 👉 company -->
+                            <!-- <VCol cols="12">
+                                <AppTextField
+                                    v-model="company"
+                                    :rules="[requiredValidator]"
+                                    label="Company"
+                                    placeholder="PixInvent"
+                                />
+                            </VCol> -->
 
-              <!-- 👉 Contact -->
-              <VCol cols="12">
-                <AppTextField
-                  v-model="contact"
-                  type="number"
-                  :rules="[requiredValidator]"
-                  label="Contact"
-                  placeholder="+1-541-754-3010"
-                />
-              </VCol>
+                            <!-- 👉 Country -->
+                            <VCol cols="12">
+                                <AppSelect
+                                    v-model="rol_id"
+                                    label="Rol"
+                                    placeholder="Rol"
+                                    :rules="[requiredValidator]"
+                                    :items="roles"
+                                    item-title="name"
+                                    item-value="id"
+                                />
+                            </VCol>
 
-              <!-- 👉 Role -->
-              <VCol cols="12">
-                <AppSelect
-                  v-model="role"
-                  label="Select Role"
-                  placeholder="Select Role"
-                  :rules="[requiredValidator]"
-                  :items="['Admin', 'Author', 'Editor', 'Maintainer', 'Subscriber']"
-                />
-              </VCol>
+                            <VCol cols="12">
+                                <AppTextField
+                                    v-model="password"
+                                    label="Password"
+                                    placeholder="············"
+                                    :rules="[requiredValidator]"
+                                    :type="isPasswordVisible ? 'text' : 'password'"
 
-              <!-- 👉 Plan -->
-              <VCol cols="12">
-                <AppSelect
-                  v-model="plan"
-                  label="Select Plan"
-                  placeholder="Select Plan"
-                  :rules="[requiredValidator]"
-                  :items="['Basic', 'Company', 'Enterprise', 'Team']"
-                />
-              </VCol>
 
-              <!-- 👉 Status -->
-              <VCol cols="12">
-                <AppSelect
-                  v-model="status"
-                  label="Select Status"
-                  placeholder="Select Status"
-                  :rules="[requiredValidator]"
-                  :items="[{ title: 'Active', value: 'active' }, { title: 'Inactive', value: 'inactive' }, { title: 'Pending', value: 'pending' }]"
-                />
-              </VCol>
+                                    :append-inner-icon="isPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
+                                    @click:append-inner="isPasswordVisible = !isPasswordVisible"
+                                />
+                            </VCol>
 
-              <!-- 👉 Submit and Cancel -->
-              <VCol cols="12">
-                <VBtn
-                  type="submit"
-                  class="me-3"
-                >
-                  Submit
-                </VBtn>
-                <VBtn
-                  type="reset"
-                  variant="tonal"
-                  color="error"
-                  @click="closeNavigationDrawer"
-                >
-                  Cancel
-                </VBtn>
-              </VCol>
-            </VRow>
-          </VForm>
-        </VCardText>
-      </VCard>
-    </PerfectScrollbar>
-  </VNavigationDrawer>
+
+                            <!-- 👉 Contact -->
+                            <!-- <VCol cols="12">
+                                <AppTextField
+                                    v-model="contact"
+                                    type="number"
+                                    :rules="[requiredValidator]"
+                                    label="Contact"
+                                    placeholder="+1-541-754-3010"
+                                />
+                            </VCol> -->
+
+                            <!-- 👉 Role -->
+                            <!-- <VCol cols="12">
+                                <AppSelect
+                                    v-model="role"
+                                    label="Select Role"
+                                    placeholder="Select Role"
+                                    :rules="[requiredValidator]"
+                                    :items="['Admin', 'Author', 'Editor', 'Maintainer', 'Subscriber']"
+                                />
+                            </VCol> -->
+
+                            <!-- 👉 Plan -->
+                            <!-- <VCol cols="12">
+                                <AppSelect
+                                    v-model="plan"
+                                    label="Select Plan"
+                                    placeholder="Select Plan"
+                                    :rules="[requiredValidator]"
+                                    :items="['Basic', 'Company', 'Enterprise', 'Team']"
+                                />
+                            </VCol> -->
+
+                            <!-- 👉 Status -->
+                            <!-- <VCol cols="12">
+                                <AppSelect
+                                    v-model="status"
+                                    label="Select Status"
+                                    placeholder="Select Status"
+                                    :rules="[requiredValidator]"
+                                    :items="[{ title: 'Active', value: 'active' }, { title: 'Inactive', value: 'inactive' }, { title: 'Pending', value: 'pending' }]"
+                                />
+                            </VCol> -->
+
+                            <!-- 👉 Submit and Cancel -->
+                            <VCol cols="12">
+                                <VBtn
+                                    type="submit"
+                                    class="me-3"
+                                >
+                                    {{ props.dato ? 'Actualizar' : 'Agregar' }}
+                                </VBtn>
+                                <VBtn
+                                    type="reset"
+                                    variant="tonal"
+                                    color="error"
+                                    @click="closeNavigationDrawer"
+                                >
+                                    Cancelar
+                                </VBtn>
+                            </VCol>
+                        </VRow>
+                    </VForm>
+                </VCardText>
+            </VCard>
+        </PerfectScrollbar>
+    </VNavigationDrawer>
 </template>
+<style lang="scss">
+    .permission-table {
+        td {
+            border-block-end: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+            padding-block: 0.5rem;
+            padding-inline: 0;
+        }
+    }
+
+    .custom-ok-button {
+        background-color: #28a745 !important; /* Verde éxito */
+        color: white !important;
+        font-weight: bold !important;
+        padding: 10px 20px !important;
+        border-radius: 5px !important;
+        border: none !important;
+    }
+</style>

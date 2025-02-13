@@ -5,6 +5,7 @@ namespace Modules\Seguridad\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Spatie\Permission\Models\Role;
 
 class UsuarioController extends Controller
 {
@@ -69,6 +70,24 @@ class UsuarioController extends Controller
     public function store(Request $request)
     {
         //
+        try {
+            $user = User::create([
+                'name' => $request->name,
+                'lastname' => $request->lastname,
+                'email' => $request->email,
+                'password' => bcrypt($request->password)
+            ]);
+
+            $role = Role::findById($request->rol_id)->name;
+
+            $user->assignRole([$role]);
+
+            return response()->json(['data'=>$user]);
+        } catch (\Error $e) {
+            //throw $th;
+            return redirect()->back()
+                ->with('error', $e);
+        }
     }
 
     /**
@@ -93,6 +112,29 @@ class UsuarioController extends Controller
     public function update(Request $request, $id)
     {
         //
+        try {
+
+            $user = User::find($id);
+            $user->name = $request->name;
+            $user->lastname = $request->lastname;
+            $user->email = $request->email;
+
+            if ($request->password) {
+                $user->password = bcrypt($request->password);
+            }
+
+            $user->save();
+
+            $role = Role::findById($request->rol_id)->name;
+
+            $user->syncRoles([$role]);
+
+            return response()->json(['data'=>$user]);
+        } catch (\Error $e) {
+            //throw $th;
+            return redirect()->back()
+                ->with('error', $e);
+        }
     }
 
     /**
@@ -101,6 +143,15 @@ class UsuarioController extends Controller
     public function destroy($id)
     {
         //
+        try {
+            $user = User::findOrFail($id);
+            $user->delete();
+
+            return response()->json(['data' => 'registro '.$user->name.' eliminado']);
+        } catch (\Error $e) {
+            //throw $th;
+            return response()->json(['error', $e]);
+        }
     }
 
     public function incializaTabla(){

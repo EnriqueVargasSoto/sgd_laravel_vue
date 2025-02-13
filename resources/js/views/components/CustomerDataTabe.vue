@@ -150,6 +150,54 @@
             }
         });
     };
+
+    const resolveUserRoleVariant = role => {
+        const roleLowerCase = role.toLowerCase()
+        if (roleLowerCase === 'subscriber')
+            return {
+            color: 'success',
+            icon: 'tabler-user',
+            }
+        if (roleLowerCase === 'author')
+            return {
+            color: 'error',
+            icon: 'tabler-device-desktop',
+            }
+        if (roleLowerCase === 'Editor')
+            return {
+            color: 'info',
+            icon: 'tabler-chart-pie',
+            }
+        if (roleLowerCase === 'editor')
+            return {
+            color: 'warning',
+            icon: 'tabler-edit',
+            }
+        if (roleLowerCase === 'Admin')
+            return {
+            color: 'primary',
+            icon: 'tabler-crown',
+            }
+
+        return {
+            color: 'primary',
+            icon: 'tabler-user',
+        }
+    }
+
+    const resolveUserStatusVariant = stat => {
+        //const statLowerCase = stat.toLowerCase()
+        if (stat === 0)
+            return 'danger'
+        /* if (stat === 'pending')
+            return 'warning' */
+        if (stat === 1)
+            return 'success'
+        /* if (statLowerCase === 'inactive')
+            return 'secondary' */
+
+        return 'primary'
+    }
 </script>
 
 <template>
@@ -225,15 +273,27 @@
                     <template #item.roles="{ item }">
                         <div class="d-flex align-center gap-x-2">
                             <VIcon
-                            :size="22"
-                            :icon="resolveUserRoleVariant(item.role).icon"
-                            :color="resolveUserRoleVariant(item.role).color"
+                                :size="22"
+                                :icon="resolveUserRoleVariant(item.roles[0].name).icon"
+                                :color="resolveUserRoleVariant(item.roles[0].name).color"
                             />
 
-                            <div class="text-capitalize text-high-emphasis text-body-1">
-                            {{ item.role }}
+                                <div class="text-capitalize text-high-emphasis text-body-1">
+                                {{ item.roles[0].name }}
                             </div>
                         </div>
+                    </template>
+
+                    <!-- Status -->
+                    <template #item.status="{ item }">
+                        <VChip
+                            :color="resolveUserStatusVariant(item.status)"
+                            size="small"
+                            label
+                            class="text-capitalize"
+                        >
+                            {{ item.status == 1 ? 'Activo':'Inactivo' }}
+                        </VChip>
                     </template>
 
                     <!-- Assigned To -->

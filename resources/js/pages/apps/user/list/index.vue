@@ -152,7 +152,7 @@ const resolveUserRoleVariant = role => {
       color: 'primary',
       icon: 'tabler-crown',
     }
-  
+
   return {
     color: 'primary',
     icon: 'tabler-user',
@@ -167,7 +167,7 @@ const resolveUserStatusVariant = stat => {
     return 'success'
   if (statLowerCase === 'inactive')
     return 'secondary'
-  
+
   return 'primary'
 }
 

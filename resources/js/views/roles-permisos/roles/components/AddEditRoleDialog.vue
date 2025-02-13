@@ -345,7 +345,7 @@
                     <!-- 👉 Actions button -->
                     <div class="d-flex align-center justify-center gap-4">
                         <VBtn @click="onSubmit">
-                            Submit
+                            {{ props.dato ? 'Actualizar' : 'Agregar' }}
                         </VBtn>
 
                         <VBtn
@@ -353,7 +353,7 @@
                             variant="tonal"
                             @click="onReset"
                         >
-                            Cancel
+                            Cancelar
                         </VBtn>
                     </div>
                 </VForm>
@@ -380,5 +380,14 @@
             white-space: nowrap;
             }
         }
+    }
+
+    .custom-ok-button {
+        background-color: #28a745 !important; /* Verde éxito */
+        color: white !important;
+        font-weight: bold !important;
+        padding: 10px 20px !important;
+        border-radius: 5px !important;
+        border: none !important;
     }
 </style>
