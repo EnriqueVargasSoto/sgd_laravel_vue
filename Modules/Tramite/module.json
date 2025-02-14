@@ -1,0 +1,11 @@
+{
+    "name": "Tramite",
+    "alias": "tramite",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Tramite\\Providers\\TramiteServiceProvider"
+    ],
+    "files": []
+}

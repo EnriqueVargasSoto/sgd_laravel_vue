@@ -166,6 +166,27 @@ export default [
         }, */
     ]
   },
+  {
+    title: 'Procesos de Tramite',
+    icon: { icon: 'tabler-layout-kanban' },
+    //to: 'seguridad',
+    children: [
+        {
+            title: 'Expedientes Pendientes',
+            /* icon: { icon: 'tabler-box' }, */
+            to: 'expedientes-pendientes'
+        },
+
+        /* {
+            title: 'Roles & Permisos',
+            icon: { icon: 'tabler-lock' },
+            children: [
+              { title: 'Roles', to: 'roles' },
+              { title: 'Permisos', to: 'permisos' },
+            ],
+        }, */
+    ]
+  },
   /* {
     title: 'Modulos',
     icon: { icon: 'tabler-box' },

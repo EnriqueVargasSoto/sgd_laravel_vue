@@ -140,6 +140,13 @@ export const routes = [
     },
 
     {
+        path: '/proceso-tramite/expedientes-pendientes', // 📌 Asegúrate de que la ruta sea correcta
+        name: 'expedientes-pendientes',
+        component: () => import('@/views/proceso_tramite/expedientes_pendientes/Index.vue'),//DashboardAnalytics
+        meta: { requiresAuth: true } // Ruta protegida
+    },
+
+    {
         path: '/login', // 📌 Asegúrate de que la ruta sea correcta
         name: 'login',
         meta: {

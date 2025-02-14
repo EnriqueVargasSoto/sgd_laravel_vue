@@ -6,7 +6,7 @@
         endpoint: String, // Ruta API
         dynamicComponent: {
             type: Object,
-            required: true,
+            //required: true,
         },
         componentProps: {
             type: Object,

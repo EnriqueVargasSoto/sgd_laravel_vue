@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/tramite",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Tramite\\": "app/",
+            "Modules\\Tramite\\Database\\Factories\\": "database/factories/",
+            "Modules\\Tramite\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Tramite\\Tests\\": "tests/"
+        }
+    }
+}

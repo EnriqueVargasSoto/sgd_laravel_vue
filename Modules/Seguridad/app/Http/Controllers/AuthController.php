@@ -93,6 +93,7 @@ class AuthController extends Controller
             //'token' => $token,
             'roles' => $roles,
             'permissions' => $permissions,
+            'token' => $user->createToken('auth_token')->plainTextToken,
         ]);
     }
 
