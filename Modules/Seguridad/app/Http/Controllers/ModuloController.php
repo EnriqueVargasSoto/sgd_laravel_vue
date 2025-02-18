@@ -3,8 +3,11 @@
 namespace Modules\Seguridad\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+//use Illuminate\Container\Attributes\Auth;
 use Illuminate\Http\Request;
 use Modules\Seguridad\Models\Modulo;
+use Illuminate\Support\Facades\Auth;
+
 
 class ModuloController extends Controller
 {
@@ -134,12 +137,26 @@ class ModuloController extends Controller
     }
 
     public function incializaTabla(){
+
+        /* $user = Auth::user(); // Obtiene el usuario autenticado
+
+        if (!$user) {
+            return response()->json(['message' => 'No autenticado'], 401);
+        }
+        $role = $user->roles->first(); // Tomamos el primer rol del usuario
+// Obtener permisos con módulo
+        $permissions = $role->permissions;//->where('slug', 'crear', );
+        $permissions = $role->permissions->filter(function ($permiso) {
+            return $permiso->modulo->slug === 'modulos';
+        })->values();
+        return response()->json($permissions); */
+
         $headers = [
-            ['title' => 'Nombres', 'key'=> 'name'],
+            ['title' => 'Nombre', 'key'=> 'nombre'],
             ['title' => 'Slug', 'key'=> 'slug', 'sortable' => false],
-            ['title' => 'Descripcion', 'key'=> 'description', 'sortable' => false],
-            ['title' => 'Url', 'key'=> 'url', 'sortable' => false],
-            ['title' => 'Modulo Padre', 'key'=> 'parent_id', 'sortable' => false],
+            ['title' => 'Descripcion', 'key'=> 'descripcion', 'sortable' => false],
+            ['title' => 'Ruta', 'key'=> 'ruta', 'sortable' => false],
+            ['title' => 'Modulo Padre', 'key'=> 'padre_id', 'sortable' => false],
             ['title' => 'fecha', 'key'=> 'created_at', 'sortable' => false],
             ['title' => 'Acciones', 'key'=> 'actions', 'sortable' => false],
         ];

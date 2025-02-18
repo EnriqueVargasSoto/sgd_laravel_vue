@@ -19,9 +19,10 @@ use Modules\Seguridad\Http\Controllers\UsuarioController;
  *
 */
 
-Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
-    Route::apiResource('seguridad', SeguridadController::class)->names('seguridad');
-
+Route::middleware(['auth:sanctum'])->group(function () {
+    //Route::apiResource('seguridad', SeguridadController::class)->names('seguridad');
+    Route::apiResource('modulos', ModuloController::class);
+    Route::get('modulos-inicializa-tabla', [ModuloController::class, 'incializaTabla']);
 });
 
 Route::apiResource('permisos', PermisosController::class);
@@ -30,8 +31,7 @@ Route::get('permisos-inicializa-tabla', [PermisosController::class, 'incializaTa
 Route::apiResource('roles', RoleController::class);
 Route::get('roles-inicializa-tabla', [RoleController::class, 'incializaTabla']);
 
-Route::apiResource('modulos', ModuloController::class);
-Route::get('modulos-inicializa-tabla', [ModuloController::class, 'incializaTabla']);
+
 
 Route::apiResource('usuarios', UsuarioController::class);
 Route::get('usuarios-inicializa-tabla', [UsuarioController::class, 'incializaTabla']);

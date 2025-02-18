@@ -145,6 +145,12 @@ export const routes = [
         component: () => import('@/views/proceso_tramite/expedientes_pendientes/Index.vue'),//DashboardAnalytics
         meta: { requiresAuth: true } // Ruta protegida
     },
+    {
+        path: '/proceso-tramite/crear-expediente', // 📌 Asegúrate de que la ruta sea correcta
+        name: 'crear-expediente',
+        component: () => import('@/views/proceso_tramite/expedientes_pendientes/Create.vue'),//DashboardAnalytics
+        meta: { requiresAuth: true } // Ruta protegida
+    },
 
     {
         path: '/login', // 📌 Asegúrate de que la ruta sea correcta

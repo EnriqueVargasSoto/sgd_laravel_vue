@@ -13,8 +13,9 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('lastname')->nullable();
+            //$table->string('name');
+            $table->foreignId('persona_id')->constrained('personas')->onDelete('no action');
+            //$table->string('lastname')->nullable();
             $table->string('host')->nullable();
             $table->string('mac')->nullable();
             $table->string('ip')->nullable();

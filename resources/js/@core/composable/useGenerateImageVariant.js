@@ -5,8 +5,10 @@ import { useConfigStore } from '@core/stores/config'
 export const useGenerateImageVariant = (imgLight, imgDark, imgLightBordered, imgDarkBordered, bordered = false) => {
   const configStore = useConfigStore()
   const { global } = useTheme()
-  
+
   return computed(() => {
+
+    console.log('global', global.name.value);
     if (global.name.value === 'light') {
       if (configStore.skin === 'bordered' && bordered)
         return imgLightBordered

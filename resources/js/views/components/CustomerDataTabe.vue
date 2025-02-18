@@ -1,6 +1,8 @@
 <script setup>
     import Swal from 'sweetalert2';
     import dayjs from "dayjs";
+import { type } from '../demos/components/alert/demoCodeAlert';
+import { useRouter } from 'vue-router';
 
     const props = defineProps({
         endpoint: String, // Ruta API
@@ -12,6 +14,9 @@
             type: Object,
             default: () => ({}),
         },
+        router: {
+            type: String,
+        }
     });
 
     //Variables reactivas
@@ -42,6 +47,7 @@
 
 
     const isComponentVisible = ref(false);
+    const router = useRouter();  // Usar router dentro de setup()
 
     // Función para inicializar la tabla (obtener configuración inicial)
     const fetchInitTabla = async () => {
@@ -81,6 +87,10 @@
     const handleAction = (action) => {
 
         if (!action) {
+            if (props.router) {
+                //router.push(props.router);
+                router.push({ name: props.router });
+            }
             isComponentVisible.value = true; // Muestra el componente dinámico
             openModal(null);
         } else {
@@ -258,7 +268,7 @@
                     <!-- Name -->
                     <template #item.modulo="{ item }">
                         <div class="text-high-emphasis text-body-1">
-                            {{ item.modulo.name }}
+                            {{ item.modulo.nombre }}
                         </div>
                     </template>
 
@@ -318,8 +328,8 @@
                     </template>
 
                     <!-- parent -->
-                    <template #item.parent_id="{ item }">
-                        {{ item.modulo_padre ? item.modulo_padre.name :'' }}
+                    <template #item.padre_id="{ item }">
+                        {{ item.modulo_padre ? item.modulo_padre.nombre :'' }}
                     </template>
 
                     <template #bottom>

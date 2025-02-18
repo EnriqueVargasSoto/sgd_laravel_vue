@@ -2,14 +2,14 @@
 
 namespace Modules\Maestros\Models;
 
+use App\Traits\RecordsAuditLogs;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-// use Modules\Maestros\Database\Factories\OficinaFactory;
-
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Traits\RecordsAuditLogs;
 
-class Oficina extends Model
+// use Modules\Maestros\Database\Factories\TipoDerivacionFactory;
+
+class TipoDerivacion extends Model
 {
     use HasFactory, RecordsAuditLogs, SoftDeletes;
 
@@ -18,16 +18,18 @@ class Oficina extends Model
      */
     protected $connection = 'pgsql';
 
-    protected $table = 'oficinas';
+    protected $table = 'tipos_derivacion'; // Nombre de la tabla
 
     protected $fillable = [
         'id',
-        'oficina',
-        'encargado'
+        'derivacion',
+        'slug',
+        'niveles',
+        'estado'
     ];
 
-    // protected static function newFactory(): OficinaFactory
+    // protected static function newFactory(): TipoDerivacionFactory
     // {
-    //     // return OficinaFactory::new();
+    //     // return TipoDerivacionFactory::new();
     // }
 }

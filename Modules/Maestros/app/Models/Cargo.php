@@ -4,12 +4,11 @@ namespace Modules\Maestros\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-// use Modules\Maestros\Database\Factories\ImportanciaFactory;
-
+// use Modules\Maestros\Database\Factories\CargoFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\RecordsAuditLogs;
 
-class Importancia extends Model
+class Cargo extends Model
 {
     use HasFactory, RecordsAuditLogs, SoftDeletes;
 
@@ -18,12 +17,12 @@ class Importancia extends Model
      */
     protected $connection = 'pgsql';
 
-    protected $table = 'importancias';
+    protected $table = 'cargos'; // Nombre de la tabla
 
-    protected $fillable = ['id', 'importancia'];
+    protected $fillable = ['cargo', 'slug', 'descripcion'];
 
-    // protected static function newFactory(): ImportanciaFactory
+    // protected static function newFactory(): CargoFactory
     // {
-    //     // return ImportanciaFactory::new();
+    //     // return CargoFactory::new();
     // }
 }

@@ -11,11 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tipos_movimiento', function (Blueprint $table) {
+        Schema::create('tipos_derivacion', function (Blueprint $table) {
             $table->id();
-            $table->string('tipo');
+            $table->string('derivacion');
             $table->string('slug');
-            $table->tinyInteger('status')->default(1);
+            $table->text('niveles');
+            $table->tinyInteger('estado')->default(1);
             $table->timestamps();
             $table->softDeletes();
         });
@@ -26,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('tipos_movimiento');
+        Schema::dropIfExists('tipos_derivacion');
     }
 };

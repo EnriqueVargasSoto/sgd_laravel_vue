@@ -11,11 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('importancias', function (Blueprint $table) {
+        Schema::create('documentos_unidad_organica', function (Blueprint $table) {
             $table->id();
-            $table->string('importancia');
+            $table->foreignId('unidad_organica_id')->constrained('unidades_organicas')->onDelete('no action');
+            $table->foreignId('tipo_documento_id')->constrained('tipos_documento')->onDelete('no action');
+            $table->string('tipo');
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 
@@ -24,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('importancias');
+        Schema::dropIfExists('documentos_unidad_organica');
     }
 };

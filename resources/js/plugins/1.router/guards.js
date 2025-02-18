@@ -17,6 +17,7 @@ export const setupGuards = router => {
          * Feel free to update this logic to suit your needs
          */
     const isLoggedIn = !!(useCookie('userData').value && useCookie('accessToken').value)
+    console.log('isLoggedIn: ', isLoggedIn);
     console.log('to: ', to);
     console.log('to.meta.unauthenticatedOnly: ', to.meta.unauthenticatedOnly);
     /*
@@ -31,15 +32,16 @@ export const setupGuards = router => {
         return undefined
     }
     if (!canNavigate(to) && to.matched.length) {
+        console.log('to.matched: ', to.matched);
       /* eslint-disable indent */
             return isLoggedIn
                 ? { name: 'not-authorized' }
                 : {
                     name: 'login',
-                    query: {
+                    /* query: {
                         ...to.query,
                         to: to.fullPath !== '/' ? to.path : undefined,
-                    },
+                    }, */
                 }
             /* eslint-enable indent */
     }

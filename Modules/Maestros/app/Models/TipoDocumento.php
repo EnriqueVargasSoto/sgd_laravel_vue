@@ -18,9 +18,9 @@ class TipoDocumento extends Model
      */
     protected $connection = 'pgsql';
 
-    protected $table = 'tipo_documentos';
+    protected $table = 'tipos_documento';
 
-    protected $fillable = ['id', 'tipo'];
+    protected $fillable = ['id', 'nombre', 'slug', 'estado'];
 
     // protected static function newFactory(): TipoDocumentoFactory
     // {

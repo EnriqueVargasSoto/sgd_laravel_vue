@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tipos_documento', function (Blueprint $table) {
+        Schema::create('unidades_organicas', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('tipo_unidad_organica_id')->constrained('tipos_unidad_organica')->onDelete('cascade');
+            $table->foreignId('padre_id')->nullable()->constrained('unidades_organicas')->onDelete('cascade');
+            $table->foreignId('tipo_derivacion_id')->constrained('tipos_derivacion')->onDelete('cascade');
             $table->string('nombre');
-            $table->string('slug');
-            $table->tinyInteger('status')->default(1);
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('tipos_documento');
+        Schema::dropIfExists('unidades_organicas');
     }
 };

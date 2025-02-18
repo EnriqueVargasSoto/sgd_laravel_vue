@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('estados', function (Blueprint $table) {
+        Schema::create('prioridades', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('prioridad');
+            $table->string('slug');
+            $table->tinyInteger('estado')->default(1);
             $table->timestamps();
             $table->softDeletes();
         });
@@ -24,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('estados');
+        Schema::dropIfExists('prioridades');
     }
 };

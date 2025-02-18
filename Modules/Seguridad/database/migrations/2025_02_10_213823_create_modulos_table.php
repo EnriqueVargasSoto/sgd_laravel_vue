@@ -13,11 +13,13 @@ return new class extends Migration
     {
         Schema::create('modulos', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('nombre');
             $table->string('slug');
-            $table->text('description')->nullable();
-            $table->string('url')->nullable();
-            $table->foreignId('parent_id')->nullable()->constrained('modulos')->onDelete('cascade');
+            $table->string('ruta')->nullable();
+            $table->text('descripcion')->nullable();
+            $table->foreignId('padre_id')->nullable()->constrained('modulos')->onDelete('no action');
+            $table->string('icono')->nullable();
+            $table->tinyInteger('padre')->default(0);
             $table->timestamps();
             $table->softDeletes();
         });

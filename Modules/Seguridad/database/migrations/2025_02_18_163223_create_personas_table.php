@@ -1,0 +1,36 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('personas', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('unidad_organica_id')->constrained('unidades_organicas')->onDelete('cascade');
+            $table->string('nombres');
+            $table->string('apellidos');
+            $table->foreignId('tipo_documento_identidad_id')->constrained('tipos_documento_identidad')->onDelete('cascade');
+            $table->string('numero_documento');
+            $table->integer('edad');
+            $table->string('telefono');
+            $table->string('direccion');
+            $table->timestamps();
+            $table->softDeletes();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('personas');
+    }
+};

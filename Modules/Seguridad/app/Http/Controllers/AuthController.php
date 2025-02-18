@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth; // Usamos el facade de Auth para autenticar
 use App\Models\User;
+use Modules\Seguridad\Models\Modulo;
 
 class AuthController extends Controller
 {
@@ -65,37 +66,106 @@ class AuthController extends Controller
         //
     }
 
-    public function login(Request $request){
-        // Validar los datos del formulario
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
+    public function login_old(Request $request){
+        // Validar las credenciales
+        $credentials = $request->only('email', 'password');
 
-        // Intentar autenticar al usuario
-        if (!Auth::attempt($request->only('email', 'password'))) {
-            return response()->json(['error' => 'Credenciales incorrectas'], 401);
+        if (Auth::attempt($credentials)) {
+            // Obtener el usuario autenticado
+            $user = Auth::user();
+
+
+            // Obtener los módulos (roles) a los que el usuario tiene acceso con permisos 'listar'
+            /* $modulos = $user->getPermissionsViaRoles()->filter(function ($permiso) {
+                return $permiso->slug === 'listar'; // Filtrar permisos de tipo 'listar'
+            }); */
+
+            // Filtrar permisos que no tengan parent_id
+            $modulosSinPadre = $user->roles[0]->permissions->filter(function ($permiso) {
+                return ($permiso->modulo->parent_id === null || $permiso->modulo->parent_id === 0) && $permiso->slug === 'listar';
+            })->values();
+
+            // Filtrar permisos que tienen parent_id (módulos hijos)
+            $modulosConPadre = $user->roles[0]->permissions->filter(function ($permiso) {
+                return $permiso->modulo->parent_id !== null && $permiso->modulo->parent_id !== 0 && $permiso->slug === 'listar';
+            })->values();
+
+            // Agrupar módulos hijos bajo su módulo padre
+            $modulosAgrupados = $modulosSinPadre->map(function ($modulo) use ($modulosConPadre) {
+                // Filtrar los hijos para este módulo padre
+                $hijos = $modulosConPadre->filter(function ($permiso) use ($modulo) {
+                    return $permiso->modulo->parent_id === $modulo->modulo->id;
+                });
+
+                // Devolver el módulo padre con sus hijos
+                $modulo->hijos = $hijos;
+
+                return $modulo;
+            })->values();
+
+
+            // Cargar roles, permisos y módulos asociados
+            $user->load('roles.permissions.modulo');
+
+            // Generar el token de Sanctum
+            $token = $user->createToken('YourAppName')->plainTextToken;
+
+            // Responder con el usuario, sus roles, permisos y el token
+            return response()->json([
+                'user' => $user,
+                'menu' => $user->getModules($user->roles[0]->id)->values(),
+                'token' => $token,
+            ]);
+        }
+
+        // Si las credenciales son incorrectas
+        return response()->json(['message' => 'Unauthorized'], 401);
+    }
+
+    public function login(Request $request)
+    {
+        // Validar las credenciales
+        $credentials = $request->only('email', 'password');
+
+        if (!Auth::attempt($credentials)) {
+            return response()->json(['message' => 'Unauthorized'], 401);
         }
 
         // Obtener el usuario autenticado
         $user = Auth::user();
+        $user->load('roles.permissions.modulo'); // Cargar relaciones necesarias
 
-        // Generar token para el usuario
-        //$token = $user->createToken('authToken')->plainTextToken;
+        // Verificar que el usuario tiene roles asignados
+        if ($user->roles->isEmpty()) {
+            return response()->json(['message' => 'El usuario no tiene roles asignados'], 403);
+        }
 
-        // Obtener roles y permisos
-        $roles = $user->getRoleNames(); // Retorna una colección de roles
-        $permissions = $user->getAllPermissions()->pluck('name'); // Retorna una colección de permisos
+        $role = $user->roles->first(); // Tomamos el primer rol del usuario
 
-        // Respuesta con token, roles y permisos
+        // Obtener permisos con módulo
+        $permissions = $role->permissions->where('slug', 'listar');
+
+        // Separar módulos padres e hijos
+        $modulosSinPadre = $permissions->filter(fn($permiso) => is_null($permiso->modulo->parent_id) || $permiso->modulo->parent_id === 0);
+        $modulosConPadre = $permissions->filter(fn($permiso) => !is_null($permiso->modulo->parent_id) && $permiso->modulo->parent_id !== 0);
+
+        // Agrupar módulos hijos bajo su módulo padre
+        $modulosAgrupados = $modulosSinPadre->map(function ($modulo) use ($modulosConPadre) {
+            $modulo->hijos = $modulosConPadre->filter(fn($permiso) => $permiso->modulo->parent_id === $modulo->modulo->id)->values();
+            return $modulo;
+        })->values();
+
+        // Generar token con Sanctum
+        $token = $user->createToken('YourAppName')->plainTextToken;
+
+        // Responder con datos formateados
         return response()->json([
             'user' => $user,
-            //'token' => $token,
-            'roles' => $roles,
-            'permissions' => $permissions,
-            'token' => $user->createToken('auth_token')->plainTextToken,
+            'menu' => $modulosAgrupados,
+            'token' => $token,
         ]);
     }
+
 
     // Método para hacer logout
     public function logout()

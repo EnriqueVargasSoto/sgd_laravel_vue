@@ -20,7 +20,7 @@ class TipoMovimiento extends Model
 
     protected $table = 'tipo_movimientos';
 
-    protected $fillable = ['id', 'tipo'];
+    protected $fillable = ['id', 'tipo', 'slug', 'estado'];
 
     // protected static function newFactory(): TipoMovimientoFactory
     // {
