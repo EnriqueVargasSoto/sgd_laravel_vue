@@ -6,7 +6,9 @@ use Modules\Maestros\Http\Controllers\ImportanciaController;
 use Modules\Maestros\Http\Controllers\MaestrosController;
 use Modules\Maestros\Http\Controllers\OficinaController;
 use Modules\Maestros\Http\Controllers\TipoDocumentoController;
+use Modules\Maestros\Http\Controllers\TipoDocumentoIdentidadController;
 use Modules\Maestros\Http\Controllers\TipoMovimientoController;
+use Modules\Maestros\Http\Controllers\UnidadOrganicaController;
 
 /*
  *--------------------------------------------------------------------------
@@ -37,3 +39,9 @@ Route::get('estados-inicializa-tabla', [EstadoController::class, 'incializaTabla
 
 Route::apiResource('importancias', ImportanciaController::class);
 Route::get('importancias-inicializa-tabla', [ImportanciaController::class, 'incializaTabla']);
+
+Route::apiResource('unidades-organicas', UnidadOrganicaController::class);
+//Route::get('importancias-inicializa-tabla', [ImportanciaController::class, 'incializaTabla']);
+
+Route::apiResource('tipos-documentos-identidad', TipoDocumentoIdentidadController::class);
+//Route::get('importancias-inicializa-tabla', [ImportanciaController::class, 'incializaTabla']);

@@ -85,17 +85,18 @@ import { useRouter } from 'vue-router';
     };
 
     const handleAction = (action) => {
-
+        console.log('action: ', action);
         if (!action) {
             if (props.router) {
                 //router.push(props.router);
                 router.push({ name: props.router });
             }
             isComponentVisible.value = true; // Muestra el componente dinámico
-            openModal(null);
+            openModal(null, 'create');
         } else {
+            console.log('action: editar - ', action);
             isComponentVisible.value = true; // También puedes manejar para "edit"
-            openModal(action);
+            openModal(action, 'edit');
         }
     };
 
@@ -108,9 +109,12 @@ import { useRouter } from 'vue-router';
     const localComponentProps = ref({ ...props.componentProps });
 
     // Función para abrir el modal
-    const openModal = (dato) => {
+    const openModal = (dato, tipo) => {
+
+            localComponentProps.value.dato = (dato === null) ? null : { ...dato };
+
         localComponentProps.value.isDialogVisible = true;
-        localComponentProps.value.dato = dato;
+        //localComponentProps.value.dato = dato;
     };
 
     // Función para cerrar el modal
@@ -265,6 +269,28 @@ import { useRouter } from 'vue-router';
                     item-value="name"
                     class="text-no-wrap"
                 >
+
+                    <!-- Name -->
+                    <template #item.apellidos="{ item }">
+                        <div class="text-high-emphasis text-body-1">
+                             {{ item.persona.apellidos }}
+                        </div>
+                    </template>
+
+                    <!-- Name -->
+                    <template #item.nombres="{ item }">
+                        <div class="text-high-emphasis text-body-1">
+                            {{ item.persona.nombres }}
+                        </div>
+                    </template>
+
+                    <!-- Name -->
+                    <template #item.documento="{ item }">
+                        <div class="text-high-emphasis text-body-1">
+                            {{ item.persona.numero_documento }}
+                        </div>
+                    </template>
+
                     <!-- Name -->
                     <template #item.modulo="{ item }">
                         <div class="text-high-emphasis text-body-1">
@@ -405,6 +431,7 @@ import { useRouter } from 'vue-router';
             <component
                 :is="dynamicComponent"
                 v-bind="localComponentProps"
+
                 @update:is-dialog-visible="closeModal"
                 @refreshTable="reloadTable"
             />

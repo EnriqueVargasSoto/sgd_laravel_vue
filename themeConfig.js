@@ -10,7 +10,7 @@ import { AppContentLayoutNav, ContentWidth, FooterType, NavbarType } from '@layo
 
 export const { themeConfig, layoutConfig } = defineThemeConfig({
   app: {
-    title: 'Tramite Documentario',
+    title: 'vuexy',
     logo: h('div', { innerHTML: logo, style: 'line-height:0; color: rgb(var(--v-global-theme-primary))' }),
     contentWidth: ContentWidth.Fluid,
     contentLayoutNav: AppContentLayoutNav.Vertical,
@@ -36,7 +36,7 @@ export const { themeConfig, layoutConfig } = defineThemeConfig({
         },
       ],
     },
-    theme: Theme.Light,//'system',
+    theme: 'light',//'system',//Theme.Light,//
     skin: Skins.Default,
     iconRenderer: VIcon,
   },

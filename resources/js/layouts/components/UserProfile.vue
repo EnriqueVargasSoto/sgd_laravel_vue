@@ -138,10 +138,10 @@ const userProfileList = [
 
               <div>
                 <h6 class="text-h6 font-weight-medium">
-                  {{ userData.fullName || userData.username }}
+                  {{ (userData.persona.nombres+' '+userData.persona.apellidos) || userData.email }}
                 </h6>
                 <VListItemSubtitle class="text-capitalize text-disabled">
-                  {{ userData.role }}
+                  {{ userData.roles[0].name }}
                 </VListItemSubtitle>
               </div>
             </div>

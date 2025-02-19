@@ -1,23 +1,45 @@
 <script setup>
     import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
     import Swal from 'sweetalert2';
+import { ref } from 'vue';
 
     const props = defineProps({
         endpoint: String, // Ruta API
-        isDialogVisible: {
-            type: Boolean,
-            required: true,
-        },
-        dato: {
-            type: Object,
-            default: () => ({}),
-        },
-    })
+            isDialogVisible: {
+                type: Boolean,
+                required: true,
+            },
+            dato: {
+                type: Object,
+                default: () => ({}),
+            },
+        })
 
-    const emit = defineEmits([
-        'update:isDialogVisible',
-        'userData',
-    ])
+        const emit = defineEmits([
+            'update:isDialogVisible',
+            'userData',
+        ])
+
+        const usuario = ref({
+            //datos persona
+            unidad_organica_id: null,
+            nombres: null,
+            apellidos: null,
+            tipo_documento_identidad_id: null,
+            numero_documento: null,
+            edad: null,
+            telefono: null,
+            direccion: null,
+            //datos usuario
+            email: null,
+            host: null,
+            mac: null,
+            ip: null,
+            password: null,
+        })
+
+        const unidades_organicas = ref([])
+        const tipos_documento_identidad = ref([])
 
     const isFormValid = ref(false)
     const refForm = ref()
@@ -194,8 +216,34 @@
         }
     };
 
+    const fetchUnidadesOrganicas = async () => {
+        //isSelectAll.value = false
+        try {
+            const { data } = await useApi(`/unidades-organicas`);
+
+            unidades_organicas.value = data.value.data;
+
+
+        } catch (error) {
+            console.error("Error al cargar la configuración de la tabla:", error);
+        }
+    };
+
+    const fetchTiposDocumentoIdentidad = async () => {
+        //isSelectAll.value = false
+        try {
+            const { data } = await useApi(`/tipos-documentos-identidad`);
+
+            tipos_documento_identidad.value = data.value.data;
+
+
+        } catch (error) {
+            console.error("Error al cargar la configuración de la tabla:", error);
+        }
+    };
+
     // Llamar `fetchInitTabla` una vez al montar el componente
-    onMounted(async () => {await fetchRoles();});
+    onMounted(async () => {await fetchRoles(); await fetchUnidadesOrganicas(); await fetchTiposDocumentoIdentidad();});
 </script>
 
 <template>
@@ -226,10 +274,21 @@
                         @submit.prevent="onSubmit"
                     >
                         <VRow>
+
                             <!-- 👉 Full name -->
                             <VCol cols="12">
                                 <AppTextField
-                                    v-model="name"
+                                    v-model="usuario.apellidos"
+                                    :rules="[requiredValidator]"
+                                    label="Apellidos"
+                                    placeholder="Apellidos"
+                                />
+                            </VCol>
+
+                            <!-- 👉 Full name -->
+                            <VCol cols="12">
+                                <AppTextField
+                                    v-model="usuario.nombres"
                                     :rules="[requiredValidator]"
                                     label="Nombres"
                                     placeholder="Nombres"
@@ -238,14 +297,40 @@
 
                             <!-- 👉 Full name -->
                             <VCol cols="12">
-                                <AppTextField
-                                    v-model="lastname"
+                                <AppSelect
+                                    v-model="usuario.tipo_documento_identidad_id"
+                                    :items="tipos_documento_identidad"
+                                    :item-title="item => `${item.slug} - ${item.tipo}`"
+                                    item-value="id"
+                                    label="Tipo de Documento de Identidad"
+                                    placeholder="Tipo de Documento de Identidad"
                                     :rules="[requiredValidator]"
-                                    label="Apellidos"
-                                    placeholder="Apellidos"
                                 />
                             </VCol>
 
+                            <!-- 👉 Full name -->
+                            <VCol cols="12">
+                                <AppTextField
+                                    v-model="usuario.numero_documento"
+                                    :rules="[requiredValidator]"
+                                    label="Numero de Documento"
+                                    placeholder="Numero de Documento"
+                                />
+                            </VCol>
+
+
+                            <!-- 👉 Full name -->
+                            <VCol cols="12">
+                                <AppSelect
+                                    v-model="usuario.unidad_organica_id"
+                                    :items="unidades_organicas"
+                                    item-title="nombre"
+                                    item-value="id"
+                                    label="Unidad Organica"
+                                    placeholder="Unidad Organica"
+                                    :rules="[requiredValidator]"
+                                />
+                            </VCol>
                             <!-- 👉 Username -->
                             <!-- <VCol cols="12">
                                 <AppTextField

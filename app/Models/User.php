@@ -11,6 +11,7 @@ use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Laravel\Sanctum\HasApiTokens;
 use Modules\Seguridad\Models\Modulo;
+use Modules\Seguridad\Models\Persona;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -72,7 +73,7 @@ class User extends Authenticatable
 
     // Filtrar solo los módulos principales con permisos
     $filteredModules = $modules->filter(function ($module) use ($rolePermissions) {
-        if ($module->parent_id !== null) {
+        if ($module->padre_id !== null) {
             return false; // Solo dejamos módulos principales (padres)
         }
 
@@ -130,8 +131,7 @@ protected function getModuleWithSubmodules($module)
         ];
     }
 
-    /* public function roles()
-    {
-        return $this->belongsToMany(Role::class);
-    } */
+    public function persona() {
+        return $this->belongsTo(Persona::class);
+    }
 }

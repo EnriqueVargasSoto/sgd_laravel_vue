@@ -7,7 +7,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Modules\Seguridad\Models\Modulo;
 use Illuminate\Support\Facades\Auth;
-
+use Spatie\Permission\Models\Permission;
 
 class ModuloController extends Controller
 {
@@ -27,7 +27,7 @@ class ModuloController extends Controller
             // Aplicar la búsqueda si se proporciona un término
             if ($search) {
                 $query->where(function ($query) use ($search) {
-                    $query->where('name', 'like', '%' . $search . '%');
+                    $query->where('nombre', 'like', '%' . $search . '%');
                         /* ->orWhereHas('roles', function ($query) use ($search) {
                             $query->where('name', 'like', '%' . $search . '%');
                         }); */
@@ -74,7 +74,24 @@ class ModuloController extends Controller
         //
         try {
             $modulo = Modulo::create($request->all());
-            return response()->json(['data' => $modulo]);
+
+            $permisos = [
+                ['slug'=>'listar',  'name'=>'Listar'    ],
+                ['slug'=>'crear',   'name'=>'Crear'     ],
+                ['slug'=>'editar',  'name'=>'Editar'    ],
+                ['slug'=>'eliminar','name'=>'Eliminar'  ]
+            ];
+
+            foreach ($permisos as $key => $permiso) {
+                # code...
+                Permission::create([
+                    'name'      => $permiso['name'].' '.$modulo->nombre,
+                    'slug'      => $permiso['slug'],
+                    'modulo_id' => $modulo->id,
+                ]);
+            }
+
+            return response()->json(['data' => $modulo, 'mensaje' => 'Modulo '.$modulo->nombre.' creado con éxito']);
         } catch (\Error $e) {
             //throw $th;
             return response()->json(['error', $e]);
@@ -105,14 +122,21 @@ class ModuloController extends Controller
         //
         try {
             $modulo = Modulo::find($id);
-            $modulo->parent_id = $request->parent_id;
-            $modulo->name = $request->name;
+            $modulo->padre_id = $request->padre_id;
+            $modulo->nombre = $request->nombre;
             $modulo->slug = $request->slug;
-            $modulo->url = $request->url;
-            $modulo->description = $request->description;
+            $modulo->ruta = $request->ruta;
+            $modulo->descripcion = $request->descripcion;
+            $modulo->icono = $request->icono;
             $modulo->save();
 
-            return response()->json(['data' => $modulo]);
+            if ($request->padre_id) {
+                $moduloPadre = Modulo::find($request->padre_id);
+                $moduloPadre->padre = 1;
+                $moduloPadre->save();
+            }
+
+            return response()->json(['data' => $modulo, 'mensaje' => 'Modulo '.$modulo->nombre.' actualizado con éxito']);
         } catch (\Error $e) {
             //throw $th;
             return response()->json(['error', $e]);
@@ -127,6 +151,8 @@ class ModuloController extends Controller
         //
         try {
             $modulo = Modulo::findOrFail($id);
+            // 🔥 Eliminar permisos asociados
+            $modulo->permisos()->delete();
             $modulo->delete();
 
             return response()->json(['data' => 'registro '.$modulo->name.' eliminado']);

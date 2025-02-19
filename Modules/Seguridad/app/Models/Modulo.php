@@ -41,7 +41,7 @@ class Modulo extends Model
     }
 
     public function permisos() {
-        return $this->hasMany(Permission::class);
+        return $this->hasMany(Permission::class, 'modulo_id');
     }
     // protected static function newFactory(): ModuloFactory
     // {

@@ -38,6 +38,7 @@ provide(injectionKeyIsVerticalNavHovered, isHovered)
 const configStore = useLayoutConfigStore()
 
 const resolveNavItemComponent = item => {
+    console.log('item: ',item);
   if ('heading' in item)
     return VerticalNavSectionTitle
   if ('children' in item)

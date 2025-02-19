@@ -128,40 +128,24 @@ class AuthController extends Controller
         $credentials = $request->only('email', 'password');
 
         if (!Auth::attempt($credentials)) {
-            return response()->json(['message' => 'Unauthorized'], 401);
+            return response()->json(['message' => 'Email o contraseña no válidos'], 401);
         }
 
         // Obtener el usuario autenticado
         $user = Auth::user();
-        $user->load('roles.permissions.modulo'); // Cargar relaciones necesarias
+        $user->load('persona','roles');//$user->load('roles.permissions.modulo'); // Cargar relaciones necesarias
 
         // Verificar que el usuario tiene roles asignados
         if ($user->roles->isEmpty()) {
             return response()->json(['message' => 'El usuario no tiene roles asignados'], 403);
         }
-
-        $role = $user->roles->first(); // Tomamos el primer rol del usuario
-
-        // Obtener permisos con módulo
-        $permissions = $role->permissions->where('slug', 'listar');
-
-        // Separar módulos padres e hijos
-        $modulosSinPadre = $permissions->filter(fn($permiso) => is_null($permiso->modulo->parent_id) || $permiso->modulo->parent_id === 0);
-        $modulosConPadre = $permissions->filter(fn($permiso) => !is_null($permiso->modulo->parent_id) && $permiso->modulo->parent_id !== 0);
-
-        // Agrupar módulos hijos bajo su módulo padre
-        $modulosAgrupados = $modulosSinPadre->map(function ($modulo) use ($modulosConPadre) {
-            $modulo->hijos = $modulosConPadre->filter(fn($permiso) => $permiso->modulo->parent_id === $modulo->modulo->id)->values();
-            return $modulo;
-        })->values();
-
         // Generar token con Sanctum
         $token = $user->createToken('YourAppName')->plainTextToken;
 
         // Responder con datos formateados
         return response()->json([
             'user' => $user,
-            'menu' => $modulosAgrupados,
+            'menu' =>  $user->getModules($user->roles[0]->id)->values(),//$modulosAgrupados,
             'token' => $token,
         ]);
     }

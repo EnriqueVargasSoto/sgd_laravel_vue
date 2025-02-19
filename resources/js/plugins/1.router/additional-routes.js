@@ -109,8 +109,8 @@ export const routes = [
         meta: { requiresAuth: true } // Ruta protegida
     },
     {
-        path: '/maestros/tipo-documentos', // 📌 Asegúrate de que la ruta sea correcta
-        name: 'tipo-documentos',
+        path: '/maestros/tipo-documento', // 📌 Asegúrate de que la ruta sea correcta
+        name: 'tipo-documento',
         component: () => import('@/views/maestros/tipos_documentos/Index.vue'),//DashboardAnalytics
         meta: { requiresAuth: true } // Ruta protegida
     },
@@ -121,8 +121,8 @@ export const routes = [
         meta: { requiresAuth: true } // Ruta protegida
     },
     {
-        path: '/maestros/areas', // 📌 Asegúrate de que la ruta sea correcta
-        name: 'areas',
+        path: '/maestros/tipo-unidad-organica', // 📌 Asegúrate de que la ruta sea correcta
+        name: 'tipo-unidad-organica',
         component: () => import('@/views/maestros/areas/Index.vue'),//DashboardAnalytics
         meta: { requiresAuth: true } // Ruta protegida
     },
@@ -133,8 +133,34 @@ export const routes = [
         meta: { requiresAuth: true } // Ruta protegida
     },
     {
-        path: '/maestros/importancias', // 📌 Asegúrate de que la ruta sea correcta
-        name: 'importancias',
+        path: '/maestros/prioridades', // 📌 Asegúrate de que la ruta sea correcta
+        name: 'prioridades',
+        component: () => import('@/views/maestros/importancias/Index.vue'),//DashboardAnalytics
+        meta: { requiresAuth: true } // Ruta protegida
+    },
+    {
+        path: '/maestros/cargos', // 📌 Asegúrate de que la ruta sea correcta
+        name: 'cargos',
+        component: () => import('@/views/maestros/importancias/Index.vue'),//DashboardAnalytics
+        meta: { requiresAuth: true } // Ruta protegida
+    },
+
+    {
+        path: '/maestros/unidad-organica', // 📌 Asegúrate de que la ruta sea correcta
+        name: 'unidad-organica',
+        component: () => import('@/views/maestros/importancias/Index.vue'),//DashboardAnalytics
+        meta: { requiresAuth: true } // Ruta protegida
+    },
+
+    {
+        path: '/maestros/tipo-derivacion', // 📌 Asegúrate de que la ruta sea correcta
+        name: 'tipo-derivacion',
+        component: () => import('@/views/maestros/importancias/Index.vue'),//DashboardAnalytics
+        meta: { requiresAuth: true } // Ruta protegida
+    },
+    {
+        path: '/maestros/tipo-documento-identidad', // 📌 Asegúrate de que la ruta sea correcta
+        name: 'tipo-documento-identidad',
         component: () => import('@/views/maestros/importancias/Index.vue'),//DashboardAnalytics
         meta: { requiresAuth: true } // Ruta protegida
     },

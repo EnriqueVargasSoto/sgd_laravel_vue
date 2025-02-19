@@ -75,7 +75,7 @@ class PermisosController extends Controller
         //
         try {
             $permission = Permission::create($request->all());
-            return response()->json(['data' => $permission]);
+            return response()->json(['data' => $permission, 'mensaje' => 'Permiso '.$permission->name.' creado con éxito']);
         } catch (\Error $e) {
             //throw $th;
             return response()->json(['error', $e]);
@@ -107,11 +107,12 @@ class PermisosController extends Controller
         try {
             $permission = Permission::find($id);
             $permission->modulo_id = $request->modulo_id;
+            $permission->slug = $request->slug;
             $permission->name = $request->name;
             $permission->description = $request->description;
             $permission->save();
 
-            return response()->json(['data' => $permission]);
+            return response()->json(['data' => $permission, 'mensaje' => 'Permiso '.$permission->name.' actualizado con éxito']);
         } catch (\Error $e) {
             //throw $th;
             return response()->json(['error', $e]);

@@ -18,96 +18,112 @@
         'update:permission',
     ])
 
-    const modulo_id = ref(null);
-    const name = ref('');
-    const description = ref('');
+    const refVForm = ref()
+
+    const permiso = ref({
+        modulo_id: null,
+        name: null,
+        slug: null,
+        description: null
+    });
+
+    const rules = {
+        required: v => !!v || 'Este campo es obligatorio.',
+        email: v => /.+@.+\..+/.test(v) || 'Correo electrónico inválido.',
+        minLength: v => (v && v.length >= 3) || 'Debe tener al menos 3 caracteres.'
+    };
 
     const modulos = ref([]);
 
     const onReset = () => {
         emit('update:isDialogVisible', false)
-        name.value = ''
-        description.value = ''
+        permiso = {
+            modulo_id: null,
+            name: null,
+            slug: null,
+            description: null
+        };
     }
 
     const onSubmit = async() => {
-        try {
-            if (!props.dato) {
-                const { data, error } = await useApi(`/${props.endpoint}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        modulo_id: modulo_id.value,
-                        name: name.value,
-                        slug: name.value,
-                        description: description.value,
-                    }),
-                });
+        refVForm.value?.validate().then(async ({ valid: isValid }) => {
+            if (isValid)
+            try {
+                if (!props.dato) {
+                    const { data, error } = await useApi(`/${props.endpoint}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(permiso.value),
+                    });
 
 
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: data.value.mensaje,//'El permiso se ha agregado correctamente.',
+                        icon: 'success',
+                        confirmButtonText: 'OK',
+                        buttonsStyling: false, // Desactiva los estilos predeterminados
+                        customClass: {
+                            confirmButton: 'custom-ok-button'
+                        }
+                    });
+
+                    emit('refreshTable'); // Actualiza la tabla
+
+                } else {
+                    const { data, error } = await useApi(`/${props.endpoint}/${props.dato.id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(permiso.value),
+                    });
+
+
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: data.value.mensaje,//'El permiso se ha actualizado correctamente.',
+                        icon: 'success',
+                        confirmButtonText: 'OK',
+                        buttonsStyling: false, // Desactiva los estilos predeterminados
+                        customClass: {
+                            confirmButton: 'custom-ok-button'
+                        }
+                    });
+
+                    emit('refreshTable'); // Actualiza la tabla
+                }
+            } catch (error) {
                 Swal.fire({
-                    title: '¡Éxito!',
-                    text: 'El permiso se ha agregado correctamente.',
-                    icon: 'success',
-                    confirmButtonText: 'OK',
-                    buttonsStyling: false, // Desactiva los estilos predeterminados
-                    customClass: {
-                        confirmButton: 'custom-ok-button'
-                    }
+                    title: 'Error',
+                    text: error.error,//'Hubo un problema al agregar el permiso.',
+                    icon: 'error',
+                    confirmButtonText: 'Intentar de nuevo',
                 });
-
-                emit('refreshTable'); // Actualiza la tabla
-
-            } else {
-                const { data, error } = await useApi(`/${props.endpoint}/${props.dato.id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        modulo_id: modulo_id.value,
-                        name: name.value,
-                        slug: name.value,
-                        description: description.value,
-                    }),
-                });
-
-
-                Swal.fire({
-                    title: '¡Éxito!',
-                    text: 'El permiso se ha actualizado correctamente.',
-                    icon: 'success',
-                    confirmButtonText: 'OK',
-                    buttonsStyling: false, // Desactiva los estilos predeterminados
-                    customClass: {
-                        confirmButton: 'custom-ok-button'
-                    }
-                });
-
-                emit('refreshTable'); // Actualiza la tabla
+            } finally{
+                emit('refreshTable');
+                emit('update:isDialogVisible', false)
+                emit('update:permissionName', '')
             }
-        } catch (error) {
-            Swal.fire({
-                title: 'Error',
-                text: 'Hubo un problema al agregar el permiso.',
-                icon: 'error',
-                confirmButtonText: 'Intentar de nuevo',
-            });
-        } finally{
-            emit('refreshTable');
-            emit('update:isDialogVisible', false)
-            emit('update:permissionName', '')
-        }
+        });
+
     }
 
     watch(() => props.dato, (newDato) => {
-        name.value = newDato?.name || ''
-        description.value = newDato?.description || ''
-        modulo_id.value = newDato?.modulo_id || null
-    }, { immediate: true }) // `immediate: true` para actualizar al inicio
+        if (newDato) {
+            permiso.value = { ...newDato };
+        } else {
+            permiso.value = {
+                modulo_id: null,
+                name: null,
+                slug: null,
+                description: null
+            };
+        }
+    }, {  immediate: true });
 
     const fetchModulos = async () => {
         try {
             const { data } = await useApi(`/modulos`);
-            modulos.value = data.value.data.filter(item => item.submodulos.length === 0);
+            modulos.value = data.value.data;// modulos.value = data.value.data.filter(item => item.submodulos.length === 0);
         } catch (error) {
             console.error("Error al cargar la configuración de la tabla:", error);
         }
@@ -137,7 +153,7 @@
                 </p>
 
                 <!-- 👉 Form -->
-                <VForm  style="text-align: center;">
+                <VForm  ref="refVForm" @submit.prevent="onSubmit">
                     <VAlert
                         type="warning"
                         title="¡Advertencia!"
@@ -153,31 +169,47 @@
                     <!-- 👉 Role name -->
                     <div class="d-flex gap-4 mb-6 flex-wrap flex-column flex-sm-row">
 
+
                         <AppSelect
-                            v-model="modulo_id"
+                            v-model="permiso.modulo_id"
                             :items="modulos"
-                            item-title="name"
+                            item-title="nombre"
                             item-value="id"
                             placeholder="Modulo"
+                            :rules="[rules.required]"
                         />
                     </div>
                     <!-- 👉 Role name -->
                     <div class="d-flex gap-4 mb-6 flex-wrap flex-column flex-sm-row">
                         <AppTextField
-                            v-model="name"
+                            v-model="permiso.name"
                             placeholder="Nombre de Permiso"
+                            :rules="[rules.required]"
                         />
                     </div>
+
+                    <!-- 👉 Role name -->
+                    <div class="d-flex gap-4 mb-6 flex-wrap flex-column flex-sm-row">
+                        <AppTextField
+                            v-model="permiso.slug"
+                            placeholder="Slug de Permiso"
+                            :rules="[rules.required]"
+                        />
+                    </div>
+
                     <!-- 👉 Role name -->
                     <div class="d-flex gap-4 mb-6 flex-wrap flex-column flex-sm-row">
                         <AppTextarea
-                            v-model="description"
+                            v-model="permiso.description"
                             placeholder="Descripcion de Permiso"
                         />
                     </div>
-                    <VBtn @click="onSubmit">
-                        {{ props.dato ? 'Actualizar' : 'Agregar' }}
-                    </VBtn>
+                    <!-- 👉 Role name -->
+                    <div class="d-flex gap-4 mb-6 flex-wrap flex-column flex-sm-row" style="justify-content: flex-end;">
+                        <VBtn type="submit">
+                            {{ props.dato ? 'Actualizar' : 'Agregar' }}
+                        </VBtn>
+                    </div>
 
                 </VForm>
             </VCardText>

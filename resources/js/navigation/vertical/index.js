@@ -5,4 +5,4 @@ import forms from './forms'
 import others from './others'
 import uiElements from './ui-elements'
 
-export default [...dashboard, ...appsAndPages /*, ...uiElements, ...forms, ...charts, ...others */]
+export default appsAndPages// [/* ...dashboard,  */...appsAndPages /*, ...uiElements, ...forms, ...charts, ...others */]

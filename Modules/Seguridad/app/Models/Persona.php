@@ -2,6 +2,7 @@
 
 namespace Modules\Seguridad\Models;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 // use Modules\Seguridad\Database\Factories\PersonaFactory;
@@ -23,4 +24,8 @@ class Persona extends Model
     // {
     //     // return PersonaFactory::new();
     // }
+
+    public function usuarios() {
+        return $this->hasMany(User::class);
+    }
 }

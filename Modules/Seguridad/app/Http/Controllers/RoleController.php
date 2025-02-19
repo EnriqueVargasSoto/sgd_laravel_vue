@@ -91,7 +91,7 @@ class RoleController extends Controller
             $role = Role::create(['name' => $request->name]);
             $role->syncPermissions($selectedPermissionIds);
 
-            return response()->json(['data' => $role]);
+            return response()->json(['data' => $role, 'mensaje' => 'Rol '.$role->name.' creado con éxito']);
         } catch (\Error $e) {
             //throw $th;
             return response()->json(['error', $e]);
@@ -142,7 +142,7 @@ class RoleController extends Controller
             $role->syncPermissions($selectedPermissionIds);
             //$role->syncPermissions($selectedPermissionIds); // Actualizar permisos del rol
 
-            return response()->json(['data' => $role]);
+            return response()->json(['data' => $role, 'mensaje' => 'Rol '.$role->name.' actualizado con éxito']);
         } catch (\Error $e) {
             //throw $th;
             return response()->json(['error', $e]);

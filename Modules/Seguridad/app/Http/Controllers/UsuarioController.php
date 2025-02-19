@@ -20,15 +20,17 @@ class UsuarioController extends Controller
             $perPage = $request->get('per_page');
             $search = $request->get('search');
 
-            $query = User::with('roles')->orderBy('id', 'asc');
+            $query = User::with('roles', 'persona')->orderBy('id', 'asc');
 
             // Aplicar la búsqueda si se proporciona un término
             if ($search) {
                 $query->where(function ($query) use ($search) {
-                    $query->where('name', 'like', '%' . $search . '%');
-                        /* ->orWhereHas('roles', function ($query) use ($search) {
-                            $query->where('name', 'like', '%' . $search . '%');
-                        }); */
+                    $query->where('email', 'like', '%' . $search . '%')
+                        ->orWhereHas('persona', function ($query) use ($search) {
+                            $query->where('nombre', 'like', '%' . $search . '%')
+                            ->orWhere('apellidos', 'like', '%' . $search . '%')
+                            ->orWhere('numero_documento', 'like', '%' . $search . '%');
+                        });
                 });
             }
 
@@ -156,7 +158,10 @@ class UsuarioController extends Controller
 
     public function incializaTabla(){
         $headers = [
-            ['title' => 'Usuario', 'key'=> 'name'],
+            ['title' => 'Apellidos', 'key'=> 'apellidos'],
+            ['title' => 'Nombres', 'key'=> 'nombres'],
+            ['title' => 'N° Documento', 'key'=> 'documento'],
+            ['title' => 'Email', 'key'=> 'email'],
             ['title' => 'Rol', 'key'=> 'roles'],
             ['title' => 'Estado', 'key'=> 'status', 'sortable' => false],
             /* ['title' => 'Descripcion', 'key'=> 'description', 'sortable' => false], */
