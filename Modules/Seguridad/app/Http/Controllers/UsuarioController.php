@@ -5,6 +5,7 @@ namespace Modules\Seguridad\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Modules\Seguridad\Models\Persona;
 use Spatie\Permission\Models\Role;
 
 class UsuarioController extends Controller
@@ -20,7 +21,7 @@ class UsuarioController extends Controller
             $perPage = $request->get('per_page');
             $search = $request->get('search');
 
-            $query = User::with('roles', 'persona')->orderBy('id', 'asc');
+            $query = User::with('roles', 'persona.tipo_documento_identidad', 'persona.unidad_organica')->orderBy('id', 'asc');
 
             // Aplicar la búsqueda si se proporciona un término
             if ($search) {
@@ -73,10 +74,24 @@ class UsuarioController extends Controller
     {
         //
         try {
+
+            $persona = Persona::create([
+                'unidad_organica_id' => $request->unidad_organica_id,
+                'nombres' => $request->nombres,
+                'apellidos' => $request->apellidos,
+                'tipo_documento_identidad_id' => $request->tipo_documento_identidad_id,
+                'numero_documento' => $request->numero_documento,
+                'edad' => $request->edad,
+                'telefono' => $request->telefono,
+                'direccion' => $request->direccion,
+            ]);
+
             $user = User::create([
-                'name' => $request->name,
-                'lastname' => $request->lastname,
+                'persona_id' => $persona->id,
                 'email' => $request->email,
+                'host' => $request->host,
+                'mac' => $request->mac,
+                'ip' => $request->ip,
                 'password' => bcrypt($request->password)
             ]);
 
@@ -84,11 +99,10 @@ class UsuarioController extends Controller
 
             $user->assignRole([$role]);
 
-            return response()->json(['data'=>$user]);
+            return response()->json(['data'=>$user, 'mensaje' => 'Usuario '.$persona->nombres.' '.$persona->apellidos.' creado con éxito']);
         } catch (\Error $e) {
             //throw $th;
-            return redirect()->back()
-                ->with('error', $e);
+            return response()->json(['error', $e]);
         }
     }
 
@@ -116,10 +130,13 @@ class UsuarioController extends Controller
         //
         try {
 
+
             $user = User::find($id);
-            $user->name = $request->name;
-            $user->lastname = $request->lastname;
             $user->email = $request->email;
+            $user->host = $request->host;
+            $user->mac = $request->mac;
+            $user->ip = $request->ip;
+
 
             if ($request->password) {
                 $user->password = bcrypt($request->password);
@@ -127,11 +144,23 @@ class UsuarioController extends Controller
 
             $user->save();
 
+            $persona = Persona::find($user->persona_id);
+            $persona->unidad_organica_id = $request->unidad_organica_id;
+            $persona->nombres = $request->nombres;
+            $persona->apellidos = $request->apellidos;
+            $persona->tipo_documento_identidad_id = $request->tipo_documento_identidad_id;
+            $persona->numero_documento = $request->numero_documento;
+            $persona->edad = $request->edad;
+            $persona->telefono = $request->telefono;
+            $persona->direccion = $request->direccion;
+
+            $persona->save();
+
             $role = Role::findById($request->rol_id)->name;
 
             $user->syncRoles([$role]);
 
-            return response()->json(['data'=>$user]);
+            return response()->json(['data'=>$user, 'mensaje' => 'Usuario '.$persona->nombres.' '.$persona->apellidos.' actualizado con éxito']);
         } catch (\Error $e) {
             //throw $th;
             return redirect()->back()
@@ -160,7 +189,9 @@ class UsuarioController extends Controller
         $headers = [
             ['title' => 'Apellidos', 'key'=> 'apellidos'],
             ['title' => 'Nombres', 'key'=> 'nombres'],
+            ['title' => 'Tipo Documento Identidad', 'key'=> 'tipo_documento_identidad'],
             ['title' => 'N° Documento', 'key'=> 'documento'],
+            ['title' => 'Unidad Orgánica', 'key'=> 'unidad_organica'],
             ['title' => 'Email', 'key'=> 'email'],
             ['title' => 'Rol', 'key'=> 'roles'],
             ['title' => 'Estado', 'key'=> 'status', 'sortable' => false],

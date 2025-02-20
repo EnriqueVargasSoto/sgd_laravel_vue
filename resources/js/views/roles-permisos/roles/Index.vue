@@ -12,7 +12,6 @@ const fetchPermisos = async () => {
         const { data } = await useApi(`/modulos`);
 
         permisos.value = data.value.data;
-        console.log('permisos:', permisos)
     } catch (error) {
         console.error("Error al cargar la configuración de la tabla:", error);
     }

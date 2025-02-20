@@ -85,7 +85,6 @@ import { useRouter } from 'vue-router';
     };
 
     const handleAction = (action) => {
-        console.log('action: ', action);
         if (!action) {
             if (props.router) {
                 //router.push(props.router);
@@ -94,7 +93,6 @@ import { useRouter } from 'vue-router';
             isComponentVisible.value = true; // Muestra el componente dinámico
             openModal(null, 'create');
         } else {
-            console.log('action: editar - ', action);
             isComponentVisible.value = true; // También puedes manejar para "edit"
             openModal(action, 'edit');
         }
@@ -285,9 +283,24 @@ import { useRouter } from 'vue-router';
                     </template>
 
                     <!-- Name -->
+                    <template #item.tipo_documento_identidad="{ item }">
+                        <div class="text-high-emphasis text-body-1">
+                            {{ item.persona.tipo_documento_identidad.slug }}
+                        </div>
+                    </template>
+
+
+                    <!-- Name -->
                     <template #item.documento="{ item }">
                         <div class="text-high-emphasis text-body-1">
                             {{ item.persona.numero_documento }}
+                        </div>
+                    </template>
+
+                    <!-- Name -->
+                    <template #item.unidad_organica="{ item }">
+                        <div class="text-high-emphasis text-body-1">
+                            {{ item.persona.unidad_organica.nombre }}
                         </div>
                     </template>
 

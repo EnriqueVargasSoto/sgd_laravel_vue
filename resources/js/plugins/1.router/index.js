@@ -4,7 +4,6 @@ import { redirects, routes } from './additional-routes'
 import { setupGuards } from './guards'
 
 function recursiveLayouts(route) {
-    console.log('rutas: ', route)
   if (route.children) {
     for (let i = 0; i < route.children.length; i++)
       route.children[i] = recursiveLayouts(route.children[i])
@@ -31,7 +30,6 @@ const router = createRouter({
       ...pages,
       ...routes,
     ].map(route => recursiveLayouts(route)),
-    //console.log('pages: ', pages)
 
   ],
 })

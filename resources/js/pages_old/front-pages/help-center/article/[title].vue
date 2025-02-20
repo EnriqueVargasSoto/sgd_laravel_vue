@@ -18,7 +18,6 @@ const articleData = ref()
 setTimeout(async () => {
   const { data, error } = await useApi('/pages/help-center/article')
   if (error.value)
-    console.log(error.value)
   else
     articleData.value = data.value
 }, 1000)

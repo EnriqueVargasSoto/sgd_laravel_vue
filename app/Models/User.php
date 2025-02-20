@@ -27,10 +27,13 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
-        'lastname',
+        'persona_id',
         'email',
+        'host',
+        'mac',
+        'ip',
         'password',
+        'status'
     ];
 
     /**
@@ -57,66 +60,67 @@ class User extends Authenticatable
     }
 
     public function getModules($roleId)
-{
-    // Obtiene el rol con sus permisos
-    $role = Role::with('permissions')->find($roleId);
+    {
+        // Obtiene el rol con sus permisos
+        $role = Role::with('permissions')->find($roleId);
 
-    if (!$role) {
-        return response()->json(['error' => 'Rol no encontrado'], 404);
-    }
-
-    // Obtiene los permisos del rol
-    $rolePermissions = $role->permissions;
-
-    // Obtener todos los módulos con sus submódulos
-    $modules = Modulo::with('submodulos.submodulos')->get();
-
-    // Filtrar solo los módulos principales con permisos
-    $filteredModules = $modules->filter(function ($module) use ($rolePermissions) {
-        if ($module->padre_id !== null) {
-            return false; // Solo dejamos módulos principales (padres)
+        if (!$role) {
+            return response()->json(['error' => 'Rol no encontrado'], 404);
         }
 
-        // Verificar permisos en el módulo padre
-        $hasPermission = $rolePermissions->contains('modulo_id', $module->id);
+        // Obtiene los permisos del rol
+        $rolePermissions = $role->permissions;
 
-        // Filtrar submódulos y submódulos de submódulos con permisos
-        $filteredSubmodules = $this->filterSubmodules($module->submodulos, $rolePermissions);
+        // Obtener todos los módulos con sus submódulos
+        //$modules = Modulo::with('submodulos.submodulos')->whereNull('padre_id')->get();
+        $modules = Modulo::with('submodulos.submodulos')->get();
 
-        // Asignamos los submódulos filtrados
-        $module->setRelation('submodulos', $filteredSubmodules);
+        // Filtrar solo los módulos principales con permisos
+        $filteredModules = $modules->filter(function ($module) use ($rolePermissions) {
+            if ($module->padre_id !== null) {
+                return false; // Solo dejamos módulos principales (padres)
+            }
 
-        return $hasPermission || $filteredSubmodules->isNotEmpty();
-    });
+            // Verificar permisos en el módulo padre
+            $hasPermission = $rolePermissions->contains('modulo_id', $module->id);
 
-    return $filteredModules->map(function ($module) {
-        return $this->getModuleWithSubmodules($module);
-    });
-}
+            // Filtrar submódulos y submódulos de submódulos con permisos
+            $filteredSubmodules = $this->filterSubmodules($module->submodulos, $rolePermissions);
 
-protected function filterSubmodules($submodules, $rolePermissions)
-{
-    return $submodules->filter(function ($submodule) use ($rolePermissions) {
-        // Verifica si el usuario tiene permiso en el submódulo
-        $hasPermission = $rolePermissions->contains('modulo_id', $submodule->id);
+            // Asignamos los submódulos filtrados
+            $module->setRelation('submodulos', $filteredSubmodules->values());
 
-        // Filtrar submódulos dentro del submódulo actual (tercer nivel)
-        $filteredSubSubmodules = $this->filterSubmodules($submodule->submodulos, $rolePermissions);
+            return $hasPermission || $filteredSubmodules->isNotEmpty();
+        });
 
-        // Asignamos los submódulos filtrados
-        $submodule->setRelation('submodulos', $filteredSubSubmodules);
+        return $filteredModules->map(function ($module) {
+            return $this->getModuleWithSubmodules($module);
+        });
+    }
 
-        return $hasPermission || $filteredSubSubmodules->isNotEmpty();
-    });
-}
+    protected function filterSubmodules($submodules, $rolePermissions)
+    {
+        return $submodules->filter(function ($submodule) use ($rolePermissions) {
+            // Verifica si el usuario tiene permiso en el submódulo
+            $hasPermission = $rolePermissions->contains('modulo_id', $submodule->id);
 
-protected function getModuleWithSubmodules($module)
-{
-    return
-         $module
-        //'submodulos' => $module->submodulos,
-    ;
-}
+            // Filtrar submódulos dentro del submódulo actual (tercer nivel)
+            $filteredSubSubmodules = $this->filterSubmodules($submodule->submodulos, $rolePermissions);
+
+            // Asignamos los submódulos filtrados
+            $submodule->setRelation('submodulos', $filteredSubSubmodules->values());
+
+            return $hasPermission || $filteredSubSubmodules->isNotEmpty();
+        });
+    }
+
+    protected function getModuleWithSubmodules($module)
+    {
+        return
+            $module
+            //'submodulos' => $module->submodulos,
+        ;
+    }
 
 
     protected function getModuleWithPermissions($module)
@@ -134,4 +138,6 @@ protected function getModuleWithSubmodules($module)
     public function persona() {
         return $this->belongsTo(Persona::class);
     }
+
+
 }

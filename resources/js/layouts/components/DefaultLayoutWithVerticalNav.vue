@@ -1,5 +1,6 @@
 <script setup>
-import navItems from '@/navigation/vertical'
+//import navItems from '@/navigation/vertical'
+import {getMenu} from '@/navigation/vertical/menu.js'
 import { themeConfig } from '@themeConfig'
 
 // Components
@@ -13,10 +14,16 @@ import NavBarI18n from '@core/components/I18n.vue'
 
 // @layouts plugin
 import { VerticalNavLayout } from '@layouts'
+
+const menu = ref([]);
+
+onBeforeMount(async () => {
+    menu.value = await getMenu();
+});
 </script>
 
 <template>
-  <VerticalNavLayout :nav-items="navItems">
+  <VerticalNavLayout :nav-items="menu">
     <!-- 👉 navbar -->
     <template #navbar="{ toggleVerticalOverlayNavActive }">
       <div class="d-flex h-100 align-center">

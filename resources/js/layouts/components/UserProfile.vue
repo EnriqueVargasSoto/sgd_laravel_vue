@@ -14,6 +14,7 @@ const logout = async () => {
 
   // Remove "userData" from cookie
   userData.value = null
+  localStorage.removeItem("menu");
 
   // Redirect to login page
   await router.push('/login')

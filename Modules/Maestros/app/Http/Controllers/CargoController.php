@@ -4,9 +4,9 @@ namespace Modules\Maestros\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Modules\Maestros\Models\Oficina;
+use Modules\Maestros\Models\Cargo;
 
-class OficinaController extends Controller
+class CargoController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -19,12 +19,12 @@ class OficinaController extends Controller
             $perPage = $request->get('per_page');
             $search = $request->get('search');
 
-            $query = Oficina::/* with('submodulos', 'moduloPadre', 'permisos')-> */orderBy('id', 'asc');
+            $query = Cargo::/* with('submodulos', 'moduloPadre', 'permisos')-> */orderBy('id', 'asc');
 
             // Aplicar la búsqueda si se proporciona un término
             if ($search) {
                 $query->where(function ($query) use ($search) {
-                    $query->where('oficina', 'like', '%' . $search . '%');
+                    $query->where('cargo', 'like', '%' . $search . '%');
                         /* ->orWhereHas('roles', function ($query) use ($search) {
                             $query->where('name', 'like', '%' . $search . '%');
                         }); */
@@ -54,7 +54,6 @@ class OficinaController extends Controller
             return response()->json(['error', $e]);
         }
     }
-
     /**
      * Show the form for creating a new resource.
      */
@@ -68,13 +67,13 @@ class OficinaController extends Controller
      */
     public function store(Request $request)
     {
-        //
         try {
-            $oficina = Oficina::create($request->all());
-            return response()->json(['data' => $oficina]);
+            //code...
+            $cargo = Cargo::create($request->all());
+            return response()->json(['data' => $cargo, 'mensaje' => 'Cargo '.$cargo->cargo.' creado con éxito']);
         } catch (\Error $e) {
             //throw $th;
-            return response()->json(['error', $e]);
+            return response()->json(['error' => $e]);
         }
     }
 
@@ -99,17 +98,18 @@ class OficinaController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
         try {
-            $oficina = Oficina::find($id);
-            $oficina->oficina = $request->oficina;
-            $oficina->encargado = $request->encargado;
-            $oficina->save();
+            //code...
+            $cargo = Cargo::find($id);
+            $cargo->cargo = $request->cargo;
+            $cargo->slug = $request->slug;
+            $cargo->descripcion = $request->descripcion;
+            $cargo->save();
 
-            return response()->json(['data' => $oficina]);
+            return response()->json(['data' => $cargo, 'mensaje' => 'Cargo '.$cargo->cargo.' actualizado con éxito']);
         } catch (\Error $e) {
             //throw $th;
-            return response()->json(['error', $e]);
+            return response()->json(['error' => $e]);
         }
     }
 
@@ -118,25 +118,23 @@ class OficinaController extends Controller
      */
     public function destroy($id)
     {
-        //
         try {
-            $oficina = Oficina::findOrFail($id);
-            $oficina->delete();
+            //code...
+            $cargo = Cargo::find($id);
+            $cargo->delete();
 
-            return response()->json(['data' => 'registro '.$oficina->oficina.' eliminado']);
+            return response()->json(['data' => 'registro '.$cargo->cargo.' eliminado']);
         } catch (\Error $e) {
             //throw $th;
-            return response()->json(['error', $e]);
+            return response()->json(['error' => $e]);
         }
     }
 
     public function incializaTabla(){
         $headers = [
-            ['title' => 'Oficina', 'key'=> 'oficina'],
-            ['title' => 'Encargado', 'key'=> 'encargado', 'sortable' => false],
-            /* ['title' => 'Descripcion', 'key'=> 'description', 'sortable' => false],
-            ['title' => 'Url', 'key'=> 'url', 'sortable' => false],
-            ['title' => 'Modulo Padre', 'key'=> 'parent_id', 'sortable' => false], */
+            ['title' => 'Cargo', 'key'=> 'cargo'],
+            ['title' => 'Slug', 'key'=> 'slug', 'sortable' => false],
+            ['title' => 'Descripcion', 'key'=> 'descripcion', 'sortable' => false],
             ['title' => 'fecha', 'key'=> 'created_at', 'sortable' => false],
             ['title' => 'Acciones', 'key'=> 'actions', 'sortable' => false],
         ];
@@ -151,7 +149,7 @@ class OficinaController extends Controller
 
         $buttons = [
             [
-                'label' => 'Agregar Oficina',
+                'label' => 'Agregar Cargo',
                 'color' => 'info',
                 'icon' => 'tabler-plus',
                 'density' => 'default',
@@ -171,7 +169,7 @@ class OficinaController extends Controller
             'headers' => $headers,
             'par_page' => 10,
             'page' => 1,
-            'title' => 'Oficinas',
+            'title' => 'Cargos',
             'buttons' => $buttons,
             'filters' => [],
             'check' => true,

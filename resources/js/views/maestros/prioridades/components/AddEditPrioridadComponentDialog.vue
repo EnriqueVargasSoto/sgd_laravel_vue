@@ -18,8 +18,8 @@
         'update:permission',
     ])
 
-    const tipo_documento = ref({
-        nombre: null,
+    const prioridad = ref({
+        prioridad: null,
         slug: null,
     });
 
@@ -33,9 +33,9 @@
 
     const onReset = () => {
         emit('update:isDialogVisible', false)
-        tipo_documento.value = {
-            nombre: null,
-            slug: null
+        prioridad.value = {
+            prioridad: null,
+            slug: null,
         }
     }
 
@@ -47,7 +47,7 @@
                     const { data, error } = await useApi(`/${props.endpoint}`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(tipo_documento.value),
+                        body: JSON.stringify(prioridad.value),
                     });
 
                     Swal.fire({
@@ -67,7 +67,7 @@
                     const { data, error } = await useApi(`/${props.endpoint}/${props.dato.id}`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(tipo_documento.value),
+                        body: JSON.stringify(prioridad.value),
                     });
 
                     Swal.fire({
@@ -101,11 +101,11 @@
 
     watch(() => props.dato, (newDato) => {
         if (newDato) {
-            tipo_documento.value = { ...newDato };
+            prioridad.value = { ...newDato };
         } else {
-            tipo_documento.value = {
-                nombre: null,
-                slug: null
+            prioridad.value = {
+                prioridad: null,
+                slug: null,
             };
         }
     }, { immediate: true }) // `immediate: true` para actualizar al inicio
@@ -125,7 +125,7 @@
             <VCardText>
                 <!-- 👉 Title -->
                 <h4 class="text-h4 text-center mb-2">
-                    {{ props.dato ? 'Editar' : 'Agregar Nuevo' }} Tipo Documento
+                    {{ props.dato ? 'Editar' : 'Agregar Nuevo' }} Importancia
                 </h4>
                 <!-- <p class="text-body-1 text-center mb-6">
                     {{ props.dato ? 'Editar' : 'Agregar' }}  permiso según sus requisitos.
@@ -136,8 +136,8 @@
                     <!-- 👉 Role name -->
                     <div class="d-flex gap-4 mb-6 flex-wrap flex-column flex-sm-row">
                         <AppTextField
-                            v-model="tipo_documento.nombre"
-                            placeholder="Tipo Documento"
+                            v-model="prioridad.prioridad"
+                            placeholder="Prioridad"
                             :rules="[rules.required]"
                         />
                     </div>
@@ -145,7 +145,7 @@
                     <!-- 👉 Role name -->
                     <div class="d-flex gap-4 mb-6 flex-wrap flex-column flex-sm-row">
                         <AppTextField
-                            v-model="tipo_documento.slug"
+                            v-model="prioridad.slug"
                             placeholder="Slug"
                             :rules="[rules.required]"
                         />

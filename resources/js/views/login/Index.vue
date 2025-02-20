@@ -50,14 +50,9 @@
                     password: credentials.value.password,
                 },
                 onResponseError({ response }) {
-                    console.log('respuesta del login: ',response);
                     errors.value.email = response._data.message
                 },
             })
-
-            console.log('res del login: ',res.value);
-
-            //const { accessToken, userData, userAbilityRules } = res
 
             const userAbilityRules = [
                 {
@@ -108,10 +103,8 @@
 
             localStorage.setItem('menu', JSON.stringify(res.menu));
             await nextTick(async() => {
-                console.log('query: ', route.query.to);
                 //router.replace(route.query.to ? String(route.query.to) : '/')
                 const ruta = getFirstChildRoute(res.menu);
-                console.log('ruta: ', ruta);
                 await router.push({ name: ruta});
             })
         } catch (err) {

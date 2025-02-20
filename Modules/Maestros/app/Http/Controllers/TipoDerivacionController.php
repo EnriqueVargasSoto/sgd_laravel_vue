@@ -4,9 +4,9 @@ namespace Modules\Maestros\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Modules\Maestros\Models\TipoDocumento;
+use Modules\Maestros\Models\TipoDerivacion;
 
-class TipoDocumentoController extends Controller
+class TipoDerivacionController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -19,12 +19,12 @@ class TipoDocumentoController extends Controller
             $perPage = $request->get('per_page');
             $search = $request->get('search');
 
-            $query = TipoDocumento::/* with('submodulos', 'moduloPadre', 'permisos')-> */orderBy('id', 'asc');
+            $query = TipoDerivacion::/* with('submodulos', 'moduloPadre', 'permisos')-> */orderBy('id', 'asc');
 
             // Aplicar la búsqueda si se proporciona un término
             if ($search) {
                 $query->where(function ($query) use ($search) {
-                    $query->where('nombre', 'like', '%' . $search . '%');
+                    $query->where('derivacion', 'like', '%' . $search . '%');
                         /* ->orWhereHas('roles', function ($query) use ($search) {
                             $query->where('name', 'like', '%' . $search . '%');
                         }); */
@@ -68,13 +68,13 @@ class TipoDocumentoController extends Controller
      */
     public function store(Request $request)
     {
-        //
         try {
-            $tipo = TipoDocumento::create($request->all());
-            return response()->json(['data' => $tipo, 'mensaje' => 'Tipo de Documento '.$tipo->nombre.' creado con éxito']);
+            //code...
+            $tipo = TipoDerivacion::create($request->all());
+            return response()->json(['data' => $tipo, 'mensaje' => 'Tipo de Derivacion '.$tipo->derivacion.' creado con éxito']);
         } catch (\Error $e) {
             //throw $th;
-            return response()->json(['error', $e]);
+            return response()->json(['error' => $e]);
         }
     }
 
@@ -99,17 +99,18 @@ class TipoDocumentoController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
         try {
-            $tipo = TipoDocumento::find($id);
-            $tipo->nombre = $request->nombre;
+            //code...
+            $tipo = TipoDerivacion::find($id);
+            $tipo->derivacion = $request->derivacion;
             $tipo->slug = $request->slug;
+            $tipo->niveles = $request->niveles;
             $tipo->save();
 
-            return response()->json(['data' => $tipo, 'mensaje' => 'Tipo de Documento '.$tipo->nombre.' actualizado con éxito']);
+            return response()->json(['data' => $tipo, 'mensaje' => 'Tipo de Derivacion '.$tipo->derivacion.' actualizado con éxito']);
         } catch (\Error $e) {
             //throw $th;
-            return response()->json(['error', $e]);
+            return response()->json(['error' => $e]);
         }
     }
 
@@ -118,22 +119,23 @@ class TipoDocumentoController extends Controller
      */
     public function destroy($id)
     {
-        //
         try {
-            $tipo = TipoDocumento::findOrFail($id);
+            //code...
+            $tipo = TipoDerivacion::find($id);
             $tipo->delete();
 
-            return response()->json(['data' => 'registro '.$tipo->nombre.' eliminado']);
+            return response()->json(['data' => 'registro '.$tipo->derivacion.' eliminado']);
         } catch (\Error $e) {
             //throw $th;
-            return response()->json(['error', $e]);
+            return response()->json(['error' => $e]);
         }
     }
 
     public function incializaTabla(){
         $headers = [
-            ['title' => 'Tipo', 'key'=> 'nombre'],
+            ['title' => 'Tipo de Derivacion', 'key'=> 'derivacion'],
             ['title' => 'Slug', 'key'=> 'slug', 'sortable' => false],
+            ['title' => 'Niveles', 'key'=> 'niveles', 'sortable' => false],
             ['title' => 'fecha', 'key'=> 'created_at', 'sortable' => false],
             ['title' => 'Acciones', 'key'=> 'actions', 'sortable' => false],
         ];
@@ -148,7 +150,7 @@ class TipoDocumentoController extends Controller
 
         $buttons = [
             [
-                'label' => 'Agregar Tipo de Documento',
+                'label' => 'Agregar Tipo de Derivacion',
                 'color' => 'info',
                 'icon' => 'tabler-plus',
                 'density' => 'default',
@@ -168,7 +170,7 @@ class TipoDocumentoController extends Controller
             'headers' => $headers,
             'par_page' => 10,
             'page' => 1,
-            'title' => 'Tipos de Documento',
+            'title' => 'Tipos de Derivacion',
             'buttons' => $buttons,
             'filters' => [],
             'check' => true,

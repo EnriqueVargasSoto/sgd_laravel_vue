@@ -1,62 +1,55 @@
 <script setup>
     import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
     import Swal from 'sweetalert2';
-import { ref } from 'vue';
 
     const props = defineProps({
         endpoint: String, // Ruta API
-            isDialogVisible: {
-                type: Boolean,
-                required: true,
-            },
-            dato: {
-                type: Object,
-                default: () => ({}),
-            },
-        })
+        isDialogVisible: {
+            type: Boolean,
+            required: true,
+        },
+        dato: {
+            type: Object,
+            default: () => ({}),
+        },
+    })
 
-        const emit = defineEmits([
-            'update:isDialogVisible',
-            'userData',
-        ])
+    const emit = defineEmits([
+        'update:isDialogVisible',
+        'userData',
+    ])
 
-        const usuario = ref({
-            //datos persona
-            unidad_organica_id: null,
-            nombres: null,
-            apellidos: null,
-            tipo_documento_identidad_id: null,
-            numero_documento: null,
-            edad: null,
-            telefono: null,
-            direccion: null,
-            //datos usuario
-            email: null,
-            host: null,
-            mac: null,
-            ip: null,
-            password: null,
-        })
+    const usuario = ref({
+        //datos persona
+        unidad_organica_id: null,
+        nombres: null,
+        apellidos: null,
+        tipo_documento_identidad_id: null,
+        numero_documento: null,
+        edad: null,
+        telefono: null,
+        direccion: null,
+        //datos usuario
+        email: null,
+        host: null,
+        mac: null,
+        ip: null,
+        password: null,
+        rol_id: null
+    })
 
-        const unidades_organicas = ref([])
-        const tipos_documento_identidad = ref([])
+    const rules = {
+        required: v => !!v || 'Este campo es obligatorio.',
+        email: v => /.+@.+\..+/.test(v) || 'Correo electrónico inválido.',
+        minLength: v => (v && v.length >= 6) || 'Debe tener al menos 6 caracteres.'
+    };
+
+    const unidades_organicas = ref([])
+    const tipos_documento_identidad = ref([])
 
     const isFormValid = ref(false)
     const refForm = ref()
-    const fullName = ref('')
-    const name = ref('')
-    const lastname = ref('')
-    const rol_id = ref()
-    const userName = ref('')
-    const email = ref('')
-    const company = ref('')
-    const country = ref()
-    const contact = ref('')
-    const role = ref()
-    const plan = ref()
-    const status = ref()
 
-    const password = ref();
     const isPasswordVisible = ref(false)
 
     const roles = ref([]);
@@ -71,34 +64,20 @@ import { ref } from 'vue';
     }
 
     const onSubmit = async() => {
-        refForm.value?.validate().then(async({ valid }) => {
-            const dataForm = {
-                name: name.value,
-                lastname: lastname.value,
-                email: email.value,
-                rol_id: rol_id.value,
-                password: password.value
-            };
-            console.log('data: ', dataForm);
-
+        refForm.value?.validate().then(async({ valid: isValid }) => {
+            if (isValid)
             try {
                 if (!props.dato) {
                     const { data, error } = await useApi(`/${props.endpoint}`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            name: name.value,
-                            lastname: lastname.value,
-                            email: email.value,
-                            rol_id: rol_id.value,
-                            password: password.value
-                        }),
+                        body: JSON.stringify(usuario.value),
                     });
 
 
                     Swal.fire({
                         title: '¡Éxito!',
-                        text: 'El permiso se ha agregado correctamente.',
+                        text: data.value.mensaje,//'El permiso se ha agregado correctamente.',
                         icon: 'success',
                         confirmButtonText: 'OK',
                         buttonsStyling: false, // Desactiva los estilos predeterminados
@@ -113,19 +92,13 @@ import { ref } from 'vue';
                     const { data, error } = await useApi(`/${props.endpoint}/${props.dato.id}`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            name: name.value,
-                            lastname: lastname.value,
-                            email: email.value,
-                            rol_id: rol_id.value,
-                            password: password.value
-                        }),
+                        body: JSON.stringify(usuario.value),
                     });
 
 
                     Swal.fire({
                         title: '¡Éxito!',
-                        text: 'El permiso se ha actualizado correctamente.',
+                        text: data.value.mensaje,//'El permiso se ha actualizado correctamente.',
                         icon: 'success',
                         confirmButtonText: 'OK',
                         buttonsStyling: false, // Desactiva los estilos predeterminados
@@ -139,7 +112,7 @@ import { ref } from 'vue';
             } catch (error) {
                 Swal.fire({
                     title: 'Error',
-                    text: 'Hubo un problema al agregar el permiso.',
+                    text: error.error,//'Hubo un problema al agregar el permiso.',
                     icon: 'error',
                     confirmButtonText: 'Intentar de nuevo',
                 });
@@ -147,7 +120,7 @@ import { ref } from 'vue';
                 /* emit('refreshTable');
                 emit('update:isDialogVisible', false)
                 emit('update:permissionName', '') */
-                emit('userData', {
+                /* emit('userData', {
                     id: 0,
                     fullName: fullName.value,
                     company: company.value,
@@ -159,7 +132,7 @@ import { ref } from 'vue';
                     status: status.value,
                     avatar: '',
                     billing: 'Auto Debit',
-                })
+                }) */
                 emit('update:isDialogVisible', false)
                 nextTick(() => {
                     refForm.value?.reset()
@@ -167,26 +140,7 @@ import { ref } from 'vue';
                 })
             }
 
-            /* if (valid) {
-                emit('userData', {
-                    id: 0,
-                    fullName: fullName.value,
-                    company: company.value,
-                    role: role.value,
-                    country: country.value,
-                    contact: contact.value,
-                    email: email.value,
-                    currentPlan: plan.value,
-                    status: status.value,
-                    avatar: '',
-                    billing: 'Auto Debit',
-                })
-                emit('update:isDialogVisible', false)
-                nextTick(() => {
-                    refForm.value?.reset()
-                    refForm.value?.resetValidation()
-                })
-            } */
+
         })
     }
 
@@ -196,11 +150,28 @@ import { ref } from 'vue';
 
     watch(() => props.dato, (newDato) => {
 
-        console.log(newDato);
-        name.value = newDato?.name || ''
+        usuario.value = {
+            unidad_organica_id: newDato?.persona?.unidad_organica_id || null,
+            nombres: newDato?.persona?.nombres || null,
+            apellidos: newDato?.persona?.apellidos || null,
+            tipo_documento_identidad_id: newDato?.persona?.tipo_documento_identidad_id || null,
+            numero_documento: newDato?.persona?.numero_documento || null,
+            edad: newDato?.persona?.edad || null,
+            telefono: newDato?.persona?.telefono || null,
+            direccion: newDato?.persona?.direccion || null,
+
+            email: newDato?.email || null,
+            host: newDato?.host || null,
+            mac: newDato?.mac || null,
+            ip: newDato?.ip || null,
+            password: null,
+            rol_id: Array.isArray(newDato?.roles) && newDato.roles.length > 0 ? newDato.roles[0].id : null,
+
+        }
+       /*  name.value = newDato?.name || ''
         lastname.value = newDato?.lastname || ''
         email.value = newDato?.email || ''
-        rol_id.value = (newDato?.roles && newDato.roles.length > 0) ? newDato.roles[0].id : null;//newDato?.roles[0].id || null
+        rol_id.value = (newDato?.roles && newDato.roles.length > 0) ? newDato.roles[0].id : null;//newDato?.roles[0].id || null */
     }, { immediate: true }) // `immediate: true` para actualizar al inicio
 
     const fetchRoles = async () => {
@@ -210,7 +181,6 @@ import { ref } from 'vue';
 
             roles.value = data.value.data;
 
-            console.log('roles:', roles.value[0])
         } catch (error) {
             console.error("Error al cargar la configuración de la tabla:", error);
         }
@@ -243,7 +213,7 @@ import { ref } from 'vue';
     };
 
     // Llamar `fetchInitTabla` una vez al montar el componente
-    onMounted(async () => {await fetchRoles(); await fetchUnidadesOrganicas(); await fetchTiposDocumentoIdentidad();});
+    onMounted(async () => {await fetchRoles(); await fetchUnidadesOrganicas(); await fetchTiposDocumentoIdentidad(); });
 </script>
 
 <template>
@@ -279,7 +249,7 @@ import { ref } from 'vue';
                             <VCol cols="12">
                                 <AppTextField
                                     v-model="usuario.apellidos"
-                                    :rules="[requiredValidator]"
+                                    :rules="[rules.required]"
                                     label="Apellidos"
                                     placeholder="Apellidos"
                                 />
@@ -289,7 +259,7 @@ import { ref } from 'vue';
                             <VCol cols="12">
                                 <AppTextField
                                     v-model="usuario.nombres"
-                                    :rules="[requiredValidator]"
+                                    :rules="[rules.required]"
                                     label="Nombres"
                                     placeholder="Nombres"
                                 />
@@ -304,7 +274,7 @@ import { ref } from 'vue';
                                     item-value="id"
                                     label="Tipo de Documento de Identidad"
                                     placeholder="Tipo de Documento de Identidad"
-                                    :rules="[requiredValidator]"
+                                    :rules="[rules.required]"
                                 />
                             </VCol>
 
@@ -312,7 +282,7 @@ import { ref } from 'vue';
                             <VCol cols="12">
                                 <AppTextField
                                     v-model="usuario.numero_documento"
-                                    :rules="[requiredValidator]"
+                                    :rules="[rules.required]"
                                     label="Numero de Documento"
                                     placeholder="Numero de Documento"
                                 />
@@ -328,58 +298,69 @@ import { ref } from 'vue';
                                     item-value="id"
                                     label="Unidad Organica"
                                     placeholder="Unidad Organica"
-                                    :rules="[requiredValidator]"
+                                    :rules="[rules.required]"
                                 />
                             </VCol>
-                            <!-- 👉 Username -->
-                            <!-- <VCol cols="12">
-                                <AppTextField
-                                    v-model="userName"
-                                    :rules="[requiredValidator]"
-                                    label="Email"
-                                    placeholder="Email"
-                                />
-                            </VCol> -->
-
-                            <!-- 👉 Email -->
+                            <!-- 👉 Full name -->
                             <VCol cols="12">
                                 <AppTextField
-                                    v-model="email"
-                                    :rules="[requiredValidator, emailValidator]"
-                                    label="Email"
-                                    placeholder="johndoe@email.com"
+                                    v-model="usuario.edad"
+                                    type="number"
+                                    :rules="[rules.required]"
+                                    label="Edad"
+                                    placeholder="Edad"
                                 />
                             </VCol>
 
-                            <!-- 👉 company -->
-                            <!-- <VCol cols="12">
+                            <!-- 👉 Full name -->
+                            <VCol cols="12">
                                 <AppTextField
-                                    v-model="company"
-                                    :rules="[requiredValidator]"
-                                    label="Company"
-                                    placeholder="PixInvent"
+                                    v-model="usuario.telefono"
+                                    label="Telefono"
+                                    placeholder="Telefono"
                                 />
-                            </VCol> -->
+                            </VCol>
+
+                            <!-- 👉 Full name -->
+                            <VCol cols="12">
+                                <AppTextField
+                                    v-model="usuario.direccion"
+                                    label="Direccion"
+                                    placeholder="Direccion"
+                                />
+                            </VCol>
 
                             <!-- 👉 Country -->
                             <VCol cols="12">
                                 <AppSelect
-                                    v-model="rol_id"
+                                    v-model="usuario.rol_id"
                                     label="Rol"
                                     placeholder="Rol"
-                                    :rules="[requiredValidator]"
+                                    :rules="[rules.required]"
                                     :items="roles"
                                     item-title="name"
                                     item-value="id"
                                 />
                             </VCol>
 
+                            <!-- 👉 Email -->
                             <VCol cols="12">
                                 <AppTextField
-                                    v-model="password"
+                                    v-model="usuario.email"
+                                    :rules="[rules.required, rules.email]"
+                                    label="Email"
+                                    placeholder="johndoe@email.com"
+                                    validate-on="input"
+                                    lazy-rules
+                                />
+                            </VCol>
+
+                            <VCol cols="12">
+                                <AppTextField
+                                    v-model="usuario.password"
                                     label="Password"
                                     placeholder="············"
-                                    :rules="[requiredValidator]"
+                                    :rules="props.dato ? [] : [  rules.required, rules.minLength]"
                                     :type="isPasswordVisible ? 'text' : 'password'"
 
 
@@ -387,51 +368,6 @@ import { ref } from 'vue';
                                     @click:append-inner="isPasswordVisible = !isPasswordVisible"
                                 />
                             </VCol>
-
-
-                            <!-- 👉 Contact -->
-                            <!-- <VCol cols="12">
-                                <AppTextField
-                                    v-model="contact"
-                                    type="number"
-                                    :rules="[requiredValidator]"
-                                    label="Contact"
-                                    placeholder="+1-541-754-3010"
-                                />
-                            </VCol> -->
-
-                            <!-- 👉 Role -->
-                            <!-- <VCol cols="12">
-                                <AppSelect
-                                    v-model="role"
-                                    label="Select Role"
-                                    placeholder="Select Role"
-                                    :rules="[requiredValidator]"
-                                    :items="['Admin', 'Author', 'Editor', 'Maintainer', 'Subscriber']"
-                                />
-                            </VCol> -->
-
-                            <!-- 👉 Plan -->
-                            <!-- <VCol cols="12">
-                                <AppSelect
-                                    v-model="plan"
-                                    label="Select Plan"
-                                    placeholder="Select Plan"
-                                    :rules="[requiredValidator]"
-                                    :items="['Basic', 'Company', 'Enterprise', 'Team']"
-                                />
-                            </VCol> -->
-
-                            <!-- 👉 Status -->
-                            <!-- <VCol cols="12">
-                                <AppSelect
-                                    v-model="status"
-                                    label="Select Status"
-                                    placeholder="Select Status"
-                                    :rules="[requiredValidator]"
-                                    :items="[{ title: 'Active', value: 'active' }, { title: 'Inactive', value: 'inactive' }, { title: 'Pending', value: 'pending' }]"
-                                />
-                            </VCol> -->
 
                             <!-- 👉 Submit and Cancel -->
                             <VCol cols="12">

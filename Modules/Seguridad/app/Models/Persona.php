@@ -5,6 +5,9 @@ namespace Modules\Seguridad\Models;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Modules\Maestros\Models\TipoDocumentoIdentidad;
+use Modules\Maestros\Models\UnidadOrganica;
+
 // use Modules\Seguridad\Database\Factories\PersonaFactory;
 
 class Persona extends Model
@@ -27,5 +30,13 @@ class Persona extends Model
 
     public function usuarios() {
         return $this->hasMany(User::class);
+    }
+
+    public function tipo_documento_identidad() {
+        return $this->belongsTo(TipoDocumentoIdentidad::class);
+    }
+
+    public function unidad_organica() {
+        return $this->belongsTo(UnidadOrganica::class);
     }
 }

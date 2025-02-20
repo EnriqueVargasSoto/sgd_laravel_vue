@@ -24,7 +24,7 @@ class TipoDocumentoIdentidadController extends Controller
             // Aplicar la búsqueda si se proporciona un término
             if ($search) {
                 $query->where(function ($query) use ($search) {
-                    $query->where('nombre', 'like', '%' . $search . '%');
+                    $query->where('tipo', 'like', '%' . $search . '%');
                         /* ->orWhereHas('roles', function ($query) use ($search) {
                             $query->where('name', 'like', '%' . $search . '%');
                         }); */
@@ -68,7 +68,14 @@ class TipoDocumentoIdentidadController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        try {
+            //code...
+            $tipo = TipoDocumentoIdentidad::create($request->all());
+            return response()->json(['data' => $tipo, 'mensaje' => 'Tipo de Documento de Identidad '.$tipo->tipo.' creado con éxito']);
+        } catch (\Error $e) {
+            //throw $th;
+            return response()->json(['error' => $e]);
+        }
     }
 
     /**
@@ -92,7 +99,18 @@ class TipoDocumentoIdentidadController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        try {
+            //code...
+            $tipo = TipoDocumentoIdentidad::find($id);
+            $tipo->tipo = $request->tipo;
+            $tipo->slug = $request->slug;
+            $tipo->save();
+
+            return response()->json(['data' => $tipo, 'mensaje' => 'Tipo de Documento de Identidad '.$tipo->tipo.' actualizado con éxito']);
+        } catch (\Error $e) {
+            //throw $th;
+            return response()->json(['error' => $e]);
+        }
     }
 
     /**
@@ -100,6 +118,64 @@ class TipoDocumentoIdentidadController extends Controller
      */
     public function destroy($id)
     {
-        //
+        try {
+            //code...
+            $tipo = TipoDocumentoIdentidad::find($id);
+            $tipo->delete();
+
+            return response()->json(['data' => 'registro '.$tipo->tipo.' eliminado']);
+        } catch (\Error $e) {
+            //throw $th;
+            return response()->json(['error' => $e]);
+        }
+    }
+
+    public function incializaTabla(){
+        $headers = [
+            ['title' => 'Tipo de Documento de Identidad', 'key'=> 'tipo'],
+            ['title' => 'Slug', 'key'=> 'slug', 'sortable' => false],
+            ['title' => 'fecha', 'key'=> 'created_at', 'sortable' => false],
+            ['title' => 'Acciones', 'key'=> 'actions', 'sortable' => false],
+        ];
+
+        $colors = [
+            'Editor' => ['color' => 'info','text' => 'Editor'],
+            'users' => ['color' => 'success','text' => 'Users'],
+            'manager' => ['color' => 'warning','text' => 'Manager'],
+            'Admin' => ['color' => 'primary','text' => 'Admin'],
+            'restricted-user' => ['color' => 'error','text' => 'Restricted User'],
+        ];
+
+        $buttons = [
+            [
+                'label' => 'Agregar Tipo de Documento de Identidad',
+                'color' => 'info',
+                'icon' => 'tabler-plus',
+                'density' => 'default',
+                'action' => 'create'
+            ]
+        ];
+
+        $itemSelects = [
+            ['title' => '5', 'value'=> 5],
+            ['title' => '10', 'value'=> 10],
+            ['title' => '25', 'value'=> 25],
+            ['title' => '50', 'value'=> 50],
+            ['title' => '100', 'value'=> 100],
+        ];
+
+        $data = [
+            'headers' => $headers,
+            'par_page' => 10,
+            'page' => 1,
+            'title' => 'Tipos de Documentos de Identidad',
+            'buttons' => $buttons,
+            'filters' => [],
+            'check' => true,
+            'colors' => $colors,
+            'search' => true,
+            'item_selects' => $itemSelects
+        ];
+        return response()->json(['data'=>$data]);
     }
 }

@@ -158,8 +158,6 @@
             ...modulo,
             permisos: modulo.permisos.map( permiso => {
                 const rolePermission = newDato?.permissions.find(item => item.id === permiso.id)
-                console.log('permission: ', permiso);
-                console.log('se encontro el rol: ', rolePermission);
 
                 if (rolePermission) {
 

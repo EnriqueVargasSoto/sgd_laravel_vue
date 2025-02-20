@@ -8,15 +8,12 @@ export const useGenerateImageVariant = (imgLight, imgDark, imgLightBordered, img
 
   return computed(() => {
 
-    console.log('global', global.name.value);
     if (global.name.value === 'light') {
       if (configStore.skin === 'bordered' && bordered)
       {
-        console.log('imgLightBordered', imgLightBordered);
         return imgLightBordered
       }
       else {
-        console.log('imgLight', imgLight);
         return imgLight
       }
 
@@ -24,12 +21,10 @@ export const useGenerateImageVariant = (imgLight, imgDark, imgLightBordered, img
     if (global.name.value === 'dark') {
       if (configStore.skin === 'bordered' && bordered)
       {
-        console.log('imgDarkBordered', imgDarkBordered);
         return imgDarkBordered
       }
       else
         {
-            console.log('imgDark', imgDark);
             return imgDark
         }
     }

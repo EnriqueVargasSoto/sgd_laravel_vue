@@ -4,9 +4,9 @@ namespace Modules\Maestros\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Modules\Maestros\Models\Importancia;
+use Modules\Maestros\Models\TipoUnidadOrganica;
 
-class ImportanciaController extends Controller
+class TipoUnidadOrganicaController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -19,12 +19,12 @@ class ImportanciaController extends Controller
             $perPage = $request->get('per_page');
             $search = $request->get('search');
 
-            $query = Importancia::/* with('submodulos', 'moduloPadre', 'permisos')-> */orderBy('id', 'asc');
+            $query = TipoUnidadOrganica::/* with('submodulos', 'moduloPadre', 'permisos')-> */orderBy('id', 'asc');
 
             // Aplicar la búsqueda si se proporciona un término
             if ($search) {
                 $query->where(function ($query) use ($search) {
-                    $query->where('importancia', 'like', '%' . $search . '%');
+                    $query->where('nombre', 'like', '%' . $search . '%');
                         /* ->orWhereHas('roles', function ($query) use ($search) {
                             $query->where('name', 'like', '%' . $search . '%');
                         }); */
@@ -68,13 +68,13 @@ class ImportanciaController extends Controller
      */
     public function store(Request $request)
     {
-        //
         try {
-            $importancia = Importancia::create($request->all());
-            return response()->json(['data' => $importancia]);
+            //code...
+            $tipo = TipoUnidadOrganica::create($request->all());
+            return response()->json(['data' => $tipo, 'mensaje' => 'Tipo '.$tipo->nombre.' creado con éxito']);
         } catch (\Error $e) {
             //throw $th;
-            return response()->json(['error', $e]);
+            return response()->json(['error' => $e]);
         }
     }
 
@@ -101,14 +101,16 @@ class ImportanciaController extends Controller
     {
         //
         try {
-            $importancia = Importancia::find($id);
-            $importancia->importancia = $request->importancia;
-            $importancia->save();
+            //code...
+            $tipo = TipoUnidadOrganica::find($id);
+            $tipo->nombre = $request->nombre;
+            $tipo->slug = $request->slug;
+            $tipo->save();
 
-            return response()->json(['data' => $importancia]);
+            return response()->json(['data' => $tipo, 'mensaje' => 'Tipo '.$tipo->nombre.' actualizado con éxito']);
         } catch (\Error $e) {
             //throw $th;
-            return response()->json(['error', $e]);
+            return response()->json(['error' => $e]);
         }
     }
 
@@ -119,23 +121,21 @@ class ImportanciaController extends Controller
     {
         //
         try {
-            $importancia = Importancia::findOrFail($id);
-            $importancia->delete();
+            //code...
+            $tipo = TipoUnidadOrganica::find($id);
+            $tipo->delete();
 
-            return response()->json(['data' => 'registro '.$importancia->importancia.' eliminado']);
+            return response()->json(['data' => 'registro '.$tipo->nombre.' eliminado']);
         } catch (\Error $e) {
             //throw $th;
-            return response()->json(['error', $e]);
+            return response()->json(['error' => $e]);
         }
     }
 
     public function incializaTabla(){
         $headers = [
-            ['title' => 'Importancia', 'key'=> 'importancia'],
-            /* ['title' => 'Encargado', 'key'=> 'encargado', 'sortable' => false], */
-            /* ['title' => 'Descripcion', 'key'=> 'description', 'sortable' => false],
-            ['title' => 'Url', 'key'=> 'url', 'sortable' => false],
-            ['title' => 'Modulo Padre', 'key'=> 'parent_id', 'sortable' => false], */
+            ['title' => 'Tipo', 'key'=> 'nombre'],
+            ['title' => 'Slug', 'key'=> 'slug', 'sortable' => false],
             ['title' => 'fecha', 'key'=> 'created_at', 'sortable' => false],
             ['title' => 'Acciones', 'key'=> 'actions', 'sortable' => false],
         ];
@@ -150,7 +150,7 @@ class ImportanciaController extends Controller
 
         $buttons = [
             [
-                'label' => 'Agregar Importancia',
+                'label' => 'Agregar Tipo de Unidad Organica',
                 'color' => 'info',
                 'icon' => 'tabler-plus',
                 'density' => 'default',
@@ -170,7 +170,7 @@ class ImportanciaController extends Controller
             'headers' => $headers,
             'par_page' => 10,
             'page' => 1,
-            'title' => 'Importancias',
+            'title' => 'Tipos de Unidades Organicas',
             'buttons' => $buttons,
             'filters' => [],
             'check' => true,

@@ -1,8 +1,18 @@
 // TODO: Get type from backend
-const userData = useCookie('userData')
-const valor = localStorage.getItem("menu");
-const menu = JSON.parse(valor);
-const nuevoMenu = transformMenuData(menu);
+
+
+export async function getMenu() {
+    const valor = localStorage.getItem("menu");
+
+    if (!valor) return [];
+
+    const menu = JSON.parse(valor);
+
+    const nuevoMenu = transformMenuData(menu);
+
+    return nuevoMenu;
+}
+
 
 function transformMenuData(modules) {
     return modules
@@ -40,11 +50,10 @@ function transformSubmodule(submodule) {
     }
 
     if (submodule.submodulos && submodule.submodulos.length > 0) {
-        transformedSubmodule.children = submodule.submodulos.map(sub => transformSubmodule(sub));
+        transformedSubmodule.children = submodule.submodulos.map(sub => transformSubmodule(sub)).filter(sub => sub !== null); // Filtra los submódulos vacíos;
     }
 
     return transformedSubmodule;
 }
 
-export default nuevoMenu;
 

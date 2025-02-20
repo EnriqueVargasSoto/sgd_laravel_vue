@@ -18,7 +18,7 @@
         'update:permission',
     ])
 
-    const tipo_documento = ref({
+    const tipo_unidad_organica = ref({
         nombre: null,
         slug: null,
     });
@@ -33,9 +33,9 @@
 
     const onReset = () => {
         emit('update:isDialogVisible', false)
-        tipo_documento.value = {
+        tipo_unidad_organica.value = {
             nombre: null,
-            slug: null
+            slug: null,
         }
     }
 
@@ -47,7 +47,7 @@
                     const { data, error } = await useApi(`/${props.endpoint}`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(tipo_documento.value),
+                        body: JSON.stringify(tipo_unidad_organica.value),
                     });
 
                     Swal.fire({
@@ -67,7 +67,7 @@
                     const { data, error } = await useApi(`/${props.endpoint}/${props.dato.id}`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(tipo_documento.value),
+                        body: JSON.stringify(tipo_unidad_organica.value),
                     });
 
                     Swal.fire({
@@ -101,11 +101,11 @@
 
     watch(() => props.dato, (newDato) => {
         if (newDato) {
-            tipo_documento.value = { ...newDato };
+            tipo_unidad_organica.value = { ...newDato };
         } else {
-            tipo_documento.value = {
+            tipo_unidad_organica.value = {
                 nombre: null,
-                slug: null
+                slug: null,
             };
         }
     }, { immediate: true }) // `immediate: true` para actualizar al inicio
@@ -125,7 +125,7 @@
             <VCardText>
                 <!-- 👉 Title -->
                 <h4 class="text-h4 text-center mb-2">
-                    {{ props.dato ? 'Editar' : 'Agregar Nuevo' }} Tipo Documento
+                    {{ props.dato ? 'Editar' : 'Agregar Nuevo' }} Tipo de Unidad Organica
                 </h4>
                 <!-- <p class="text-body-1 text-center mb-6">
                     {{ props.dato ? 'Editar' : 'Agregar' }}  permiso según sus requisitos.
@@ -136,8 +136,8 @@
                     <!-- 👉 Role name -->
                     <div class="d-flex gap-4 mb-6 flex-wrap flex-column flex-sm-row">
                         <AppTextField
-                            v-model="tipo_documento.nombre"
-                            placeholder="Tipo Documento"
+                            v-model="tipo_unidad_organica.nombre"
+                            placeholder="Tipo"
                             :rules="[rules.required]"
                         />
                     </div>
@@ -145,7 +145,7 @@
                     <!-- 👉 Role name -->
                     <div class="d-flex gap-4 mb-6 flex-wrap flex-column flex-sm-row">
                         <AppTextField
-                            v-model="tipo_documento.slug"
+                            v-model="tipo_unidad_organica.slug"
                             placeholder="Slug"
                             :rules="[rules.required]"
                         />

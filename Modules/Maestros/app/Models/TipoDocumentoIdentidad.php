@@ -2,6 +2,7 @@
 
 namespace Modules\Maestros\Models;
 
+use App\Models\User;
 use App\Traits\RecordsAuditLogs;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -31,4 +32,8 @@ class TipoDocumentoIdentidad extends Model
     // {
     //     // return TipoDocumentoIdentidadFactory::new();
     // }
+
+    public function personas() {
+        return $this->hasMany(User::class);
+    }
 }

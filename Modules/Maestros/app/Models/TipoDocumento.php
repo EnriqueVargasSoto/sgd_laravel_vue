@@ -26,4 +26,5 @@ class TipoDocumento extends Model
     // {
     //     // return TipoDocumentoFactory::new();
     // }
+
 }

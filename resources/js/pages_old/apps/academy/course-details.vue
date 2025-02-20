@@ -6,7 +6,6 @@ import 'video.js/dist/video-js.css'
 const courseDetails = ref()
 const { data, error } = await useApi('/apps/academy/course-details')
 if (error.value)
-  console.log(error.value)
 else if (data.value)
   courseDetails.value = data.value
 const panelStatus = ref(0)

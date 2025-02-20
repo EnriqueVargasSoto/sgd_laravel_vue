@@ -25,7 +25,6 @@ export const handlerAuth = [
           userData: userOutData,
         }
 
-        console.log('esto devuelve: ', response);
         return HttpResponse.json(response, { status: 201 })
       }
       catch (e) {
